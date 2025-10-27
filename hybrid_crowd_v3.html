@@ -356,16 +356,16 @@
         ];
 
         const got_items = [
-            { field1: "chimpanzee", field2: "baseball player", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_UteSYpuoJyofP4W" },
-            { field1: "fire station", field2: "confectionary", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_vAKydv0JcgsEY4D" },
-            { field1: "eel", field2: "tiger shark", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_BShkYxhh1As8B3H" },
-            { field1: "horse", field2: "golden retriever", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_mhwf8FQqLjen8EK" },
-            { field1: "parking meter", field2: "stop sign", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_auQ0MszsukI3ogf" },
-            { field1: "barn", field2: "greenhouse", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ud9B8A93VN1cA6h" },
-            { field1: "armadillo", field2: "basketball", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_TS0kpa101GdAVru" },
-            { field1: "apple", field2: "robin", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_MfV9KuMYgiGM4mq" },
-            { field1: "mug", field2: "bubble", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_fmSEgyR746c5xpL" },
-            { field1: "centipede", field2: "crayon", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2dLv0qCysyUdQ78" }
+            { field1: "Chimpanzee", field2: "Baseball player", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_UteSYpuoJyofP4W" },
+            { field1: "Fire station", field2: "Confectionary", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_vAKydv0JcgsEY4D" },
+            { field1: "Eel", field2: "Tiger shark", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_BShkYxhh1As8B3H" },
+            { field1: "Horse", field2: "Golden retriever", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_mhwf8FQqLjen8EK" },
+            { field1: "Parking meter", field2: "Stop sign", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_auQ0MszsukI3ogf" },
+            { field1: "Barn", field2: "Greenhouse", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ud9B8A93VN1cA6h" },
+            { field1: "Armadillo", field2: "Basketball", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_TS0kpa101GdAVru" },
+            { field1: "Apple", field2: "Robin", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_MfV9KuMYgiGM4mq" },
+            { field1: "Mug", field2: "Bubble", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_fmSEgyR746c5xpL" },
+            { field1: "Centipede", field2: "Crayon", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2dLv0qCysyUdQ78" }
         ];
 
         const items_practice = [
@@ -478,67 +478,7 @@
                     `;
                 }
             },       
-             // PART 2: YOUR MEDIA HABITS & VIEWS
-            {
-                id: 'media_usage',
-                getHTML: () => {
-                    // Shuffle the main platforms list
-                    for (let i = socialPlatformsList.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [socialPlatformsList[i], socialPlatformsList[j]] = [socialPlatformsList[j], socialPlatformsList[i]];
-                    }
-                    // Combine shuffled list with the end options
-                    const allPlatforms = [...socialPlatformsList, ...socialPlatformsEnd];
-
-                    return `
-                    <div class="space-y-8">
-                        <!-- NEWLY ADDED AI QUESTION -->
-                        <div>
-                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
-                            <div class="option-grid">
-                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        
-                        <!--
-                        <div>
-                            <p class="font-medium mb-3 text-center">How often do you share news on social media?</p>
-                            <div class="option-grid">
-                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="share_news_frequency" value="${o}" id="snf_${i}" class="hidden"><label for="snf_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        <!--
-                        <div>
-                            <p class="font-medium mb-3 text-center">In the past month, how often did you reference fact-checking websites to check whether a headline you read is true?</p>
-                            <div class="option-grid">
-                                ${['Never', 'About once a week', 'A few times a week', 'A few times a day', 'At least once a day'].map((o,i) => `<div><input type="radio" name="factcheck_freq" value="${o}" id="factcheck_freq_${i}" class="hidden"><label for="factcheck_freq_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        -->
-                    </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
-                }
-            },
-                       // NEW AI USAGE QUESTIONS
-            /* REMOVED this step and merged with 'media_usage'
-            {
-                id: 'ai_usage',
-                html: `
-                    <div class="space-y-8">
-                        <div>
-                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
-                            <div class="option-grid">
-                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        
-                    </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
-            },
-            */
-            {
+             {
                 id: 'advisorPreference',
                 condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'].includes(c),
                 getHTML: () => {
@@ -661,6 +601,85 @@
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
+           {
+                id: 'politics',
+                html: `
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">In politics, people sometimes talk of 'left' and 'right'. Where would you place yourself on this scale?</p>
+                            <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
+                                <output for="political_scale_slider" id="slider_value_display" class="mb-2 hidden">Value: 6</output>
+                                <input type="range" name="political_scale" id="political_scale_slider" min="1" max="12" step="1" value="6" oninput="const display = document.getElementById('slider_value_display'); display.classList.remove('hidden'); display.textContent = 'Value: ' + this.value" class="w-full">
+                                <div class="flex justify-between w-full text-sm text-gray-600 mt-2">
+                                    <span>Left (1)</span>
+                                    <span>Right (12)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },            
+            // PART 2: YOUR MEDIA HABITS & VIEWS
+            {
+                id: 'media_usage',
+                getHTML: () => {
+                    // Shuffle the main platforms list
+                    for (let i = socialPlatformsList.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [socialPlatformsList[i], socialPlatformsList[j]] = [socialPlatformsList[j], socialPlatformsList[i]];
+                    }
+                    // Combine shuffled list with the end options
+                    const allPlatforms = [...socialPlatformsList, ...socialPlatformsEnd];
+
+                    return `
+                    <div class="space-y-8">
+                        <!-- NEWLY ADDED AI QUESTION -->
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you share news on social media?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="share_news_frequency" value="${o}" id="snf_${i}" class="hidden"><label for="snf_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">In the past month, how often did you reference fact-checking websites to check whether a headline you read is true?</p>
+                            <div class="option-grid">
+                                ${['Never', 'About once a week', 'A few times a week', 'A few times a day', 'At least once a day'].map((o,i) => `<div><input type="radio" name="factcheck_freq" value="${o}" id="factcheck_freq_${i}" class="hidden"><label for="factcheck_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+                }
+            },
+                       // NEW AI USAGE QUESTIONS
+            /* REMOVED this step and merged with 'media_usage'
+            {
+                id: 'ai_usage',
+                html: `
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            */            
             // {
             //     id: 'misinformation_concerns',
             //     html: `
@@ -689,26 +708,7 @@
             //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
             //     `
             // },            
-            {
-                id: 'politics',
-                html: `
-                    <div class="space-y-8">
-                        <div>
-                            <p class="font-medium mb-3 text-center">In politics, people sometimes talk of 'left' and 'right'. Where would you place yourself on this scale?</p>
-                            <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
-                                <output for="political_scale_slider" id="slider_value_display" class="mb-2 hidden">Value: 6</output>
-                                <input type="range" name="political_scale" id="political_scale_slider" min="1" max="12" step="1" value="6" oninput="const display = document.getElementById('slider_value_display'); display.classList.remove('hidden'); display.textContent = 'Value: ' + this.value" class="w-full">
-                                <div class="flex justify-between w-full text-sm text-gray-600 mt-2">
-                                    <span>Left (1)</span>
-                                    <span>Right (12)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
-            },
-            // {
+             // {
             //     id: 'religion_importance',
             //     html: `
             //         <div class="space-y-8">
@@ -755,26 +755,21 @@
                         <p class="font-medium text-center">Please indicate how much you agree or disagree with each of the following statements.</p>
 
                         ${[
-                            "I often rely on, and act upon, the advice of others.",
-                            "I would like to be the last one to change my opinion in a heated argument on a controversial topic.",
-                            "Generally, I'd rather give in and go along for the sake of peace than struggle to have my way.",
-                            "I tend to follow family tradition in making political decisions.",
-                            "Basically, my friends are the ones who decide what we do together.",
-                            "A charismatic and eloquent speaker can easily influence and change my ideas.",
-                            "I am more independent than conforming in my ways.",
-                            "If someone is very persuasive, I tend to change my opinion and go along with them.",
-                            "I don't give in to others easily.",
-                            "I tend to rely on others when I have to make an important decision quickly.",
-                            "I prefer to make my own way in life rather than find a group I can follow."
+                            "For fear of doing something wrong, I prefer to copy the behaviour of others and do the same as them",
+                            "When I am unsure of my own opinion, I value what others think more highly",
+                            "When carrying out a difficult task, I proceed like the majority for fear of making a mistake",
+                            "In difficult situations, I behave like the majority, because other people know better what to do"
                         ].map((statement, idx) => `
                             <div class="mb-6">
                                 <p class="mb-3 text-center">${statement}</p>
                                 <div class="option-grid">
-                                    ${['-4', '-3', '-2', '-1', '0', '+1', '+2', '+3', '+4'].map((opt, i) => `
+                                    ${['0', '1', '2', '3', '4', '5', '6'].map((opt, i) => `
                                         <div>
                                             <input type="radio" name="conformity_${idx+1}" value="${opt}" id="conformity_${idx+1}_${i}" class="hidden">
                                             <label for="conformity_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem;">
                                                 <span class="text-sm font-semibold">${opt}</span>
+                                                ${i === 0 ? '<span class="text-xs text-gray-500">(Never)</span>' : ''}
+                                                ${i === 6 ? '<span class="text-xs text-gray-500">(Always)</span>' : ''}
                                             </label>
                                         </div>
                                     `).join('')}
@@ -921,7 +916,6 @@
                         <br>
                         <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
                             <li class="mb-2">Is the headline accurate?</li>
-                            <li class="mb-2">How confident are you in your judgment?</li>
                             <li>Have you seen or heard about the headline before?</li>
                         </ol>
                         <br>
@@ -1107,6 +1101,20 @@
             //         </div>
             //     `
             // },            
+            // PART 4: FINAL FEEDBACK
+            {
+                id: 'feedback',
+                html: `
+                    <div class="space-y-4">
+                        <label class="block font-medium mb-3 text-center" for="general_feedback">Do you have any feedback or suggestions for the study?</label>
+                        <textarea id="general_feedback" name="general_feedback" class="w-full p-2 border border-gray-300 rounded-md" rows="6"></textarea>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
             // PART 4: DEBUNKING & DEBRIEF
             {
                 id: 'debunking',
@@ -1275,8 +1283,8 @@
         }
 
         function renderHeadlineStep() {
-            const totalQuestions = allHeadlines.length * 3;
-            const questionsCompleted = currentHeadlineIndex * 3 + currentQuestionInLoop;
+            const totalQuestions = allHeadlines.length * 2;
+            const questionsCompleted = currentHeadlineIndex * 2 + currentQuestionInLoop;
             const progress = (questionsCompleted / totalQuestions) * 100;
             
             document.getElementById('progress-container').classList.remove('hidden');
@@ -1298,25 +1306,29 @@
                 case 0: // Veracity
                     questionHTML = `
                         <div>
-                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
-                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="1 - Very inaccurate" id="ver_1" class="hidden"><label for="ver_1" class="option-button">Very<br>inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="2 - Moderately inaccurate" id="ver_2" class="hidden"><label for="ver_2" class="option-button">Moderately<br>inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="3 - Slightly inaccurate" id="ver_3" class="hidden"><label for="ver_3" class="option-button">Slightly<br>inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="4 - Slightly accurate" id="ver_4" class="hidden"><label for="ver_4" class="option-button">Slightly<br>accurate</label></div>
+                                <div><input type="radio" name="veracity" value="5 - Moderately accurate" id="ver_5" class="hidden"><label for="ver_5" class="option-button">Moderately<br>accurate</label></div>
+                                <div><input type="radio" name="veracity" value="6 - Very accurate" id="ver_6" class="hidden"><label for="ver_6" class="option-button">Very<br>accurate</label></div>
                             </div>
                         </div>`;
                     break;
-                case 1: // Confidence
-                    const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
-                    const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
-                    questionHTML = `
-                        <div>
-                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
-                            <div class="option-grid">
-                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
-                            </div>
-                        </div>`;
-                    break;
-                case 2: // Familiarity
+                // case 1: // Confidence
+                //     const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
+                //     const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
+                //     questionHTML = `
+                //         <div>
+                //             <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                //             <div class="option-grid">
+                //             ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                //             </div>
+                //         </div>`;
+                //     break;
+                case 1: // Familiarity
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1365,25 +1377,29 @@
                 case 0: // Veracity
                     questionHTML = `
                         <div>
-                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
-                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="1 - Very inaccurate" id="ver_1" class="hidden"><label for="ver_1" class="option-button">Very<br>inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="2 - Moderately inaccurate" id="ver_2" class="hidden"><label for="ver_2" class="option-button">Moderately<br>inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="3 - Slightly inaccurate" id="ver_3" class="hidden"><label for="ver_3" class="option-button">Slightly<br>inaccurate</label></div>
+                                <div><input type="radio" name="veracity" value="4 - Slightly accurate" id="ver_4" class="hidden"><label for="ver_4" class="option-button">Slightly<br>accurate</label></div>
+                                <div><input type="radio" name="veracity" value="5 - Moderately accurate" id="ver_5" class="hidden"><label for="ver_5" class="option-button">Moderately<br>accurate</label></div>
+                                <div><input type="radio" name="veracity" value="6 - Very accurate" id="ver_6" class="hidden"><label for="ver_6" class="option-button">Very<br>accurate</label></div>
                             </div>
                         </div>`;
                     break;
-                case 1: // Confidence
-                    const practiceJudgment = surveyData.practice?.veracity || '';
-                    const judgmentText = practiceJudgment ? `[Your judgment: "<b>${practiceJudgment}</b>"]` : '';
-                    questionHTML = `
-                        <div>
-                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
-                            <div class="option-grid">
-                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
-                            </div>
-                        </div>`;
-                    break;
-                case 2: // Familiarity
+                // case 1: // Confidence
+                //     const practiceJudgment = surveyData.practice?.veracity || '';
+                //     const judgmentText = practiceJudgment ? `[Your judgment: "<b>${practiceJudgment}</b>"]` : '';
+                //     questionHTML = `
+                //         <div>
+                //             <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                //             <div class="option-grid">
+                //             ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                //             </div>
+                //         </div>`;
+                //     break;
+                case 1: // Familiarity
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1698,7 +1714,7 @@
                 surveyData.practice[input.name] = input.value;
             }
             currentPracticeQuestion++;
-            if (currentPracticeQuestion >= 3) {
+            if (currentPracticeQuestion >= 2) {
                 currentStep++;
                 renderStep();
             } else {
@@ -1718,7 +1734,7 @@
         function nextHeadline() {
             saveData(`headlineLoop-q${currentQuestionInLoop}`);
             currentQuestionInLoop++;
-            if (currentQuestionInLoop >= 3) {
+            if (currentQuestionInLoop >= 2) {
                 currentHeadlineIndex++;
                 currentQuestionInLoop = 0;
             }
@@ -1746,7 +1762,7 @@
             if (currentQuestionInLoop < 0) {
                 if (currentHeadlineIndex > 0) {
                     currentHeadlineIndex--;
-                    currentQuestionInLoop = 2; // Go to the last question of the previous headline
+                    currentQuestionInLoop = 1; // Go to the last question of the previous headline
                 } else {
                     currentQuestionInLoop = 0; // Stay on the first question of the first headline
                 }
@@ -1775,10 +1791,10 @@
                     // Special handling if we're moving back to the headline loop
                     if (stepData.id === 'headlineLoop') {
                         currentHeadlineIndex = allHeadlines.length - 1;
-                        currentQuestionInLoop = 2; 
+                        currentQuestionInLoop = 1; 
                     }
                     if (stepData.id === 'practice_round') {
-                        currentPracticeQuestion = 2;
+                        currentPracticeQuestion = 1;
                     }
                     
                     renderStep();
@@ -1885,6 +1901,11 @@
     </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
