@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headline Evaluation Survey - Part 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .survey-container {
+            max-width: 1080px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 9999px;
+            height: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 9999px;
+            transition: width 0.3s ease-in-out;
+        }
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+        .option-label {
+            display: block;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            margin-bottom: 0.75rem;
+        }
+        .option-label:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        input[type="radio"]:checked + .option-label,
+        input[type="checkbox"]:checked + .option-label {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-primary:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        .hidden {
+            display: none;
+        }
+        .headline-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden; /* Ensures inner elements conform to border radius */
+        }
+        .advice-card {
+            color: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+        .advice-icon {
+            width: 56px;
+            height: 56px;
+        }
+        /* Test Menu Styles */
+        #test-menu {
+            max-width: 1080px;
+            margin: 1rem auto -1rem;
+            padding: 0.5rem;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .btn-test {
+            padding: 0.5rem 0.75rem;
+            background-color: #4b5563;
+            color: white;
+            border-radius: 6px;
+            margin: 0 4px;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-test:hover {
+            background-color: #1f2937;
+        }
+        .co-author-note {
+            margin-top: 2rem;
+            padding: 0.75rem;
+            background-color: #fffbe6; /* Tailwind amber-50 */
+            border: 1px solid #fef3c7; /* Tailwind amber-200 */
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #92400e; /* Tailwind amber-800 */
+        }
+        /* New Button Styles for Options */
+        .option-grid {
+            display: flex; /* Changed from grid to flex */
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .option-grid > div {
+            flex: 1 1 0; /* Allow flex items to grow and shrink */
+            min-width: 0; /* Allows shrinking below content size */
+        }
+        .option-button {
+            padding: 0.75rem 0.5rem; /* Reduced horizontal padding */
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-align: center;
+            background-color: #fff;
+            height: 100%; /* Ensure buttons in the same row are the same height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem; /* Made font smaller */
+            line-height: 1.25; /* Improved line-height for wrapped text */
+        }
+        input[type="radio"]:checked + .option-button,
+        input[type="checkbox"]:checked + .option-button {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            font-weight: 600;
+            color: #1e40af;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+     /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted #3b82f6;
+            cursor: help;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 320px;
+            background-color: #111827; /* Tailwind gray-900 */
+            color: #fff;
+            text-align: left;
+            font-weight: normal;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 10;
+            top: 135%; /* Changed from bottom to top */
+            left: 50%;
+            margin-left: -160px; /* Half of width */
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .tooltip .tooltip-text::after { /* Arrow */
+            content: "";
+            position: absolute;
+            bottom: 100%; /* Changed from top to bottom */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #111827 transparent; /* Flipped the arrow direction */
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+     /* Custom Slider Styles */
+#political_scale_slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px; /* Increased track height */
+    background: #e5e7eb; /* Tailwind gray-200 */
+    border-radius: 9999px;
+    outline: none;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+#political_scale_slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px; /* Increased thumb size */
+    height: 24px; /* Increased thumb size */
+    background: #3b82f6; /* Tailwind blue-500 */
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#political_scale_slider::-moz-range-thumb {
+    width: 24px; /* Increased thumb size */
+    height: 24px; /* Increased thumb size */
+    background: #3b82f6;
+    cursor: pointer;
+    border-radius: 50%;
+}
+    #image-preloader {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        left: -10000px;
+        top: -10000px;
+    }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="image-preloader"></div>
+
+    <div id="test-menu">
+        <span class="font-bold mr-2 text-sm text-gray-700">CO-AUTHORS-ONLY TEST MENU:</span>
+        <button data-condition="Control" class="btn-test">Control</button>
+        <button data-condition="Fact-checker" class="btn-test">Fact-checker</button>
+        <button data-condition="Human-only" class="btn-test">Human Crowd</button>
+        <button data-condition="LLM-only" class="btn-test">LLM Crowd</button>
+        <button data-condition="Hybrid" class="btn-test">Hybrid</button>
+        <button data-condition="Self-select" class="btn-test">Self-select</button>
+    </div>
+
+    <div class="survey-container">
+        <div id="progress-container" class="progress-bar-container hidden">
+            <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+        <div id="progress-text" class="text-center text-sm text-gray-500 mb-4 hidden"></div>
+
+        <div id="app">
+             <p class="text-center text-gray-500">Please select a condition from the test menu above to begin the survey.</p>
+        </div>
+    </div>
+
+    <div id="co-author-note-container" class="hidden" style="max-width: 1080px; margin: -1rem auto 1rem;">
+        <div class="co-author-note">
+            <p><span class="font-bold">Co-author note:</span> You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.</p>
+        </div>
+    </div>
+
+    <script>
+        const ICONS = {
+            human: {
+                green: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_w4QFNy2pstJUsj2',
+                red: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_Mv6qe25xNFhIP7a'
+            },
+            robot: {
+                green: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_VIDQNEyD9IxqSj4',
+                red: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_P75HBHEr1D5qLbf'
+            }
+        };
+
+        // Preload all headline images and icons at the start
+        function preloadImages() {
+            const preloader = document.getElementById('image-preloader');
+            if (!preloader) return;
+
+            // Combine all image sources
+            const headlineImgs = items.map(h => h.image).filter(Boolean);
+            const practiceImgs = items_practice.map(h => h.image).filter(Boolean);
+            const gotImgs = got_items.map(h => h.image).filter(Boolean); // Add GOT images
+            const iconImgs = Object.values(ICONS).flatMap(type => Object.values(type));
+            const allImages = [...new Set([...headlineImgs, ...practiceImgs, ...gotImgs, ...iconImgs])]; // Use Set to avoid duplicates
+
+            // Clear previous images if any
+            preloader.innerHTML = '';
+
+            // Preload all images by adding them to the off-screen div
+            allImages.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.width = 1;
+                img.height = 1;
+                img.alt = "";
+                img.loading = "eager";
+                preloader.appendChild(img);
+            });
+        }
+        const app = document.getElementById('app');
+        
+
+        const items = [
+            { id: 1, text: "Judge tells Florida not to threaten TV stations over abortion ads | AP ...", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ciaCiV8TCMoa28g", misinfo: false, debunk: "This is a real news headline." },
+            { id: 2, text: "Rural schools feel the pinch from Trump cuts to mental health grants", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cwzRVDtmJs5WDQN", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 3, text: "Lawyers collecting $148 million judgment from Rudy Giuliani say World Series rings must be given up", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_lbdE7DvInFSx0lZ", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 4, text: "Health groups urge RFK Jr. to reinstate injury center staff - Roll Call", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_GyzJaUAIBuwVtHJ", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 5, text: "Veterans group, Democratic lawmakers rally on Capitol Hill to protest VA job cuts", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dweH9mzCdNz1KW0", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 6, text: "Encinitas’s new mayor comes from a midwestern family with a background in small-town politics", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_zDuP6coTabhRqJj", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 7, text: "Anonymous FPPC complaint targets Palomar Health management agreement", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9Sef2TtL1B9QIk0", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 8, text: "Debate over San Diego surveillance tech reignites amid immigration raids, protests and budget cuts", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_SSWqLDGBAOZLMYD", misinfo: false, debunk: "This is a real news headline." },
+            { id: 9, text: "Southern Ocean current reverses for first time, signalling risk of climate system collapse", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_755qOjTPDhBFCrR", misinfo: true, debunk: "The assertion that a Southern Ocean current has reversed for the first time, signaling a climate system collapse and the potential to double atmospheric CO2 concentrations, is not supported by evidence. While a specific, temporary deep ocean current reversal was observed, the scientific study does not conclude that this event indicates a climate system collapse or an imminent doubling of atmospheric CO2, as verified by Snopes." },
+            // { id: 10, text: "***Staff Dumps Elderly Man Out Of Bank… They Turn Pale When Steph Curry Show Up To Take Action!*** – Luxury Blogs", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1lt0KB1aLS4CfpH", misinfo: true, debunk: "The claim that NBA star Steph Curry intervened at a bank to help an elderly man denied access to his account is entirely fabricated. There is no credible evidence or reliable news reports to support this narrative, as confirmed by the fact-checking organization Snopes." },
+            { id: 11, text: "Country Music Stars Blake Shelton and Luke Bryan Join Forces for Historic Texas Flood Relief", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_zr28VKl2tMOULst", misinfo: true, debunk: "There is no credible evidence that country music stars Blake Shelton and Luke Bryan joined forces for flood relief in Kerr County, Texas, in July 2025. This claim is entirely fabricated, as the event described is set in the future, as confirmed by fact-checking organization Snopes." },
+            // { id: 12, text: "Drew Barrymore Comes Out—Fans React To Her Bold Truth", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_J1r8mky75OYq6Ks", misinfo: true, debunk: "The claim that Drew Barrymore has recently come out as bisexual is misleading. While she publicly identified as bisexual, this occurred in 2003, not recently, as confirmed by Snopes. The article itself uses future publication dates (e.g., August 20, 2025), falsely implying the event's recency." },
+            // { id: 13, text: "Donald Trump Just Hung A Painting Of Himself Where Hillary Clinton's Portrait Used To Be And It's Exactly What You'd Expect", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_JiyqTduzB9MMW13", misinfo: true, debunk: "The claim that Donald Trump replaced Hillary Clinton's portrait with his own painting is false. There is no credible evidence for this, and fact-checking organization Snopes confirms the circulating image was a photoshopped meme that originated as a joke on social media.." },
+            // { id: 14, text: "Johnny Depp and Keanu Reeves Refused Entry at a Country Club—Two Seconds Later, the Club Was Bought by Them!", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_JZSYLJjcT6FJfkX", misinfo: true, debunk: "There is no credible evidence to support the claim that Johnny Depp and Keanu Reeves were denied entry to a country club and subsequently purchased it. Reputable fact-checking organization Snopes confirms this story is entirely fabricated, with no legitimate sources supporting the incident." },
+            // { id: 15, text: "Travis Kelce bought the tiny diner that let him eat on credit in college — but what he turned it into now feeds 120 homeless people every day…", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_Y4wVCoI7zeNgWme", misinfo: true, debunk: "There is no credible evidence that Travis Kelce bought a diner from his college days and transformed it into Elena's Kitchen to feed 120 homeless people daily. Reputable news organizations and sources that cover Kelce have not reported this story, and the fact-checking website Snopes found no evidence to support the claim, identifying its origin as a website known for publishing fabricated content." },
+            // { id: 16, text: "Strict 'touch laws' in 31 states, including New York, enforce fines up to $450 for holding electronic devices", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_55gOdgeT2NK8Vaf", misinfo: true, debunk: "The claim that a new, widespread 'touch law' is set to take effect on June 5 across 31 U.S. states, imposing instant fines for holding electronic devices, lacks credible evidence. Fact-checking by Snopes indicates the article mischaracterizes existing state laws against handheld device use as a new and universally implemented 'touch law' taking effect on a specific date, rather than reporting on new legislation." }
+            { id: 17, text: "Attention check", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_e7vj18Aducmlsj2", misinfo: true, debunk: "This is an attention check" }
+            
+        ];
+
+        const got_items = [
+            { field1: "chimpanzee", field2: "baseball player", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_UteSYpuoJyofP4W" },
+            { field1: "fire station", field2: "confectionary", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_vAKydv0JcgsEY4D" },
+            { field1: "eel", field2: "tiger shark", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_BShkYxhh1As8B3H" },
+            { field1: "horse", field2: "golden retriever", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_mhwf8FQqLjen8EK" },
+            { field1: "parking meter", field2: "stop sign", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_auQ0MszsukI3ogf" },
+            { field1: "barn", field2: "greenhouse", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ud9B8A93VN1cA6h" },
+            { field1: "armadillo", field2: "basketball", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_TS0kpa101GdAVru" },
+            { field1: "apple", field2: "robin", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_MfV9KuMYgiGM4mq" },
+            { field1: "mug", field2: "bubble", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_fmSEgyR746c5xpL" },
+            { field1: "centipede", field2: "crayon", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2dLv0qCysyUdQ78" }
+        ];
+
+        const items_practice = [
+            { id: 5, text: "Veterans group, Democratic lawmakers rally on Capitol Hill to protest VA job cuts", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dweH9mzCdNz1KW0", misinfo: false, debunk: "This is a real news headline." }
+        ];
+
+        let falseHeadlines = [];
+        let trueHeadlines = [];
+
+        preloadImages();
+
+        let allHeadlines = [];
+        let headlineAdviceRatings = [];
+
+        function setupHeadlines() {
+             trueHeadlines = items.filter(item => !item.misinfo).map(item => ({
+                img: item.image,
+                isTrue: true,
+                text: item.text,
+                debunk: item.debunk
+            }));
+
+            falseHeadlines = items.filter(item => item.misinfo).map(item => ({
+                img: item.image,
+                isTrue: false,
+                text: item.text,
+                debunk: item.debunk
+            }));
+
+            allHeadlines = [...trueHeadlines, ...falseHeadlines];
+
+            for (let i = allHeadlines.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allHeadlines[i], allHeadlines[j]] = [allHeadlines[j], allHeadlines[i]];
+            }
+             // Pre-generate and store the advice ratings for each headline
+            headlineAdviceRatings = allHeadlines.map(headline => {
+                const isTrue = headline.isTrue;
+                const hybridHuman = generateCrowdRatings(3, isTrue).map(r => ({ type: 'human', rating: r }));
+                const hybridLlm = generateCrowdRatings(3, isTrue).map(r => ({ type: 'robot', rating: r }));
+
+                return {
+                    human: generateCrowdRatings(6, isTrue),
+                    llm: generateCrowdRatings(6, isTrue),
+                    hybrid: [...hybridHuman, ...hybridLlm]
+                };
+            });
+            headlines = allHeadlines.map(h => h.text);
+            factCheckerRatings = allHeadlines.map(h => h.isTrue ? 'TRUE' : 'FALSE');
+        }
+
+        let currentStep = 0;
+        let currentHeadlineIndex = 0;
+        let currentQuestionInLoop = 0; // 0: veracity, 1: confidence, 2: sharing, 3: familiarity
+        let surveyData = { answers: {}, got_answers: [] }; // Initialize got_answers array
+        let currentPracticeQuestion = 0;
+        const practiceHeadline = items_practice[0];
+        let currentGOTTrial = 0; // Track current GOT trial index
+        let gotStartTime; // To record reaction time
+
+        const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'];
+        let userCondition = '';
+        let selfSelectChoice = ''; 
+
+        function assignCondition() {
+            const randomIndex = Math.floor(Math.random() * CONDITIONS.length);
+            userCondition = CONDITIONS[randomIndex];
+            surveyData.condition = userCondition;
+        }
+
+        const coAuthorNotes = {
+            'media_usage': "You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.",
+            'ai_tools_screener': 'Press "Yes" to reveal follow-up questions.',
+            'ai_factcheck_combined': 'Press "Yes" to reveal follow-up questions.',
+            'politics': 'The pointer and value for the slider will be hidden initially to avoid anchoring.',
+            'got_instructions': "The images appear very rapidly (250ms). That's the measure, we can't really do anything about it.",
+            'conditionInfo': "from reading this are you more confused or are things rather clear?"
+        };
+
+        // Define platform lists
+        const socialPlatformsList = [
+            'Facebook', 'X (formerly Twitter)', 
+            'Instagram', 'Reddit', 'Snapchat', 
+            'TikTok', 'Twitch', 'Mastodon', 'Threads', 'BlueSky', 
+            'Truth Social', 'Gab', 'Parler', 'Gettr',
+            'Odysee', '4chan'
+        ];
+        const socialPlatformsEnd = ['None of these', 'Other'];
+
+
+        const surveySteps = [
+             // PART 1: WELCOME & INTRO
+            {
+                id: 'instructions',
+                getHTML: () => {
+                    return `
+                        <div class="text-gray-700 space-y-4">
+                            <p><strong>Welcome, and thank you for taking part!</strong></p>
+                            <p>This study is about how people interact with news in today's digital world. It has two parts:</p>
+                            <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
+                                <li class="mb-2">First, we will ask some general questions.</li>
+                                <li>Second, you will be presented with a series of news headlines and asked to evaluate them.</li>
+                            </ol>
+                            <p class="text-sm text-gray-500 mt-4">Note that the study contains attention checks.</p>
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },       
+             // PART 2: YOUR MEDIA HABITS & VIEWS
+            {
+                id: 'media_usage',
+                getHTML: () => {
+                    // Shuffle the main platforms list
+                    for (let i = socialPlatformsList.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [socialPlatformsList[i], socialPlatformsList[j]] = [socialPlatformsList[j], socialPlatformsList[i]];
+                    }
+                    // Combine shuffled list with the end options
+                    const allPlatforms = [...socialPlatformsList, ...socialPlatformsEnd];
+
+                    return `
+                    <div class="space-y-8">
+                        <!-- NEWLY ADDED AI QUESTION -->
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you share news on social media?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="share_news_frequency" value="${o}" id="snf_${i}" class="hidden"><label for="snf_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">In the past month, how often did you reference fact-checking websites to check whether a headline you read is true?</p>
+                            <div class="option-grid">
+                                ${['Never', 'About once a week', 'A few times a week', 'A few times a day', 'At least once a day'].map((o,i) => `<div><input type="radio" name="factcheck_freq" value="${o}" id="factcheck_freq_${i}" class="hidden"><label for="factcheck_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+                }
+            },
+                       // NEW AI USAGE QUESTIONS
+            /* REMOVED this step and merged with 'media_usage'
+            {
+                id: 'ai_usage',
+                html: `
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            */
+            {
+                id: 'advisorPreference',
+                condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'].includes(c),
+                getHTML: () => {
+                    const options = [
+                        { id: 'pref_humans', value: 'Human-only', text: 'A group of humans: Receiving independent advice from several different people.' },
+                        { id: 'pref_llms', value: 'LLM-only', text: 'A group of artificial intelligence (AI) chat bots: Receiving independent advice from several different AI chat bots.' },
+                        { id: 'pref_hybrid', value: 'Hybrid', text: 'A mixed group of human and artificial intelligence (AI) chat bots: Receiving independent advice from several different persons and several different AI chat bots.' }
+                    ];
+
+                    // Shuffle the options array (Fisher-Yates shuffle)
+                    for (let i = options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [options[i], options[j]] = [options[j], options[i]];
+                    }
+
+                    const optionsHTML = options.map(opt => `
+                        <div>
+                            <input type="radio" id="${opt.id}" name="advisor_preference" value="${opt.value}" class="hidden">
+                            <label for="${opt.id}" class="option-label">
+                                <b>${opt.text}</b>
+                            </label>
+                        </div>
+                    `).join('');
+
+                    return `
+
+                        <p class="mb-6 font-medium text-center">When evaluating the accuracy of online information, which of the following sources would you most prefer to receive advice from?</p>
+                        <div id="advisor-preference-options" class="space-y-4">
+                            ${optionsHTML}
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="handleAdvisorPreference()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },                            
+            {
+                id: 'trust_questions',
+                getHTML: () => {
+                    const groups = [
+                        { label: 'The National Government', name: 'trust_gov' },
+                        // { label: 'Large corporations', name: 'trust_corp' },
+                        { label: 'News Media', name: 'trust_trad_media' },
+                        // { label: 'Digital media (e.g., social media)', name: 'trust_new_media' }
+                        // { label: 'Scientists', name: 'trust_sci' },
+                        // { label: 'People in general', name: 'trust_ppl' }
+                    ];
+
+                    // Shuffle the groups array (Fisher-Yates shuffle)
+                    for (let i = groups.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [groups[i], groups[j]] = [groups[j], groups[i]];
+                    }
+
+                    const questionsHTML = groups.map(group => `
+                        <div>
+                            <p class="font-medium mb-3 text-center">${group.label}</p>
+                            <div class="option-grid">
+                                ${[
+                                    'Never',
+                                    'Some of<br>the time',
+                                    'About half<br>the time',
+                                    'Most of<br>the time',
+                                    'Always'
+                                ].map((option, i) => `
+                                    <div>
+                                        <input type="radio" name="${group.name}" value="${option.replace('<br>', ' ')}" id="${group.name}_${i}" class="hidden">
+                                        <label for="${group.name}_${i}" class="option-button">${option}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <p class="mb-6 font-medium text-center">How often do you think you can trust each of the following to do what is right?</p>
+                        <div class="space-y-8">
+                           ${questionsHTML}
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },
+            {
+                id: 'trust_in_news',
+                html: `
+                    <div class="space-y-8">
+                        <!-- Question 1 -->
+                        <div>
+                            <p class="font-medium mb-3 text-center">I think one can trust most news most of the time</p>
+                            <div class="option-grid">
+                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Question 2 -->
+                        <div>
+                            <p class="font-medium mb-3 text-center">I think I can trust most of the news I consume most of the time</p>
+                            <div class="option-grid">
+                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Question 3 -->
+                        <div>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top three news sources you trust:</label>
+                            <textarea id="top_3_news_trust" name="top_3_news_trust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
+                        </div>
+
+                        <!-- Question 4 (New) -->
+                        <div>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_distrust">Please list the top three news sources you distrust:</label>
+                            <textarea id="top_3_news_distrust" name="top_3_news_distrust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            // {
+            //     id: 'misinformation_concerns',
+            //     html: `
+            //         <h1 class="question-title">Views on Online News</h1>
+            //         <div class="space-y-8">
+            //             <!-- Question 1 -->
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">"Thinking about online news, I am concerned about what is real and what is fake on the internet."</p>
+            //                 <div class="option-grid">
+            //                     ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="misinfo_concern" value="${i+1}" id="misinfo_concern_${i}" class="hidden"><label for="misinfo_concern_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+
+            //             <!-- Question 2 -->
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">Imagine you came across something important in the news online that you suspect may be false, misleading, or fake. If you decided you wanted to check it, where would you usually go? Please select all that apply.</p>
+            //                 <div class="option-grid">
+            //                     ${['A news source I trust', 'A fact-checking website', 'Somebody I know and trust personally', 'Social media or video network', 'Search engine', 'An AI chatbot', 'Wikipedia', 'Official source (e.g. government website)', 'Comments from other users', 'Other'].map((o,i) => `<div><input type="checkbox" name="fake_verify" value="${o}" id="fv_${i}" class="hidden" onchange="handleFakeVerifyClick(event)"><label for="fv_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //                 <div id="fake_verify_other_wrapper" class="hidden mt-4">
+            //                     <label for="fake_verify_other" class="block font-medium mb-1 text-center">Other (please specify):</label>
+            //                     <input type="text" id="fake_verify_other" name="fake_verify_other" class="w-full p-2 border border-gray-300 rounded-md">
+            //                 </div>
+            //             </div>
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },            
+            {
+                id: 'politics',
+                html: `
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">In politics, people sometimes talk of 'left' and 'right'. Where would you place yourself on this scale?</p>
+                            <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
+                                <output for="political_scale_slider" id="slider_value_display" class="mb-2 hidden">Value: 6</output>
+                                <input type="range" name="political_scale" id="political_scale_slider" min="1" max="12" step="1" value="6" oninput="const display = document.getElementById('slider_value_display'); display.classList.remove('hidden'); display.textContent = 'Value: ' + this.value" class="w-full">
+                                <div class="flex justify-between w-full text-sm text-gray-600 mt-2">
+                                    <span>Left (1)</span>
+                                    <span>Right (12)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            // {
+            //     id: 'religion_importance',
+            //     html: `
+            //         <div class="space-y-8">
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">How important is religion in your life?</p>
+            //                 <div class="option-grid">
+            //                     ${['Not important at all', 'A little important', 'Moderately important', 'Very important', 'Extremely important'].map((o,i) => `<div><input type="radio" name="religion_importance" value="${o}" id="relig_imp_${i}" class="hidden"><label for="relig_imp_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },
+            //  {
+            //     id: 'humility_scale',
+            //     html: `
+            //         <div class="space-y-8">
+            //             <p class="text-gray-700 text-center">Carefully read each statement and indicate the degree to which you agree each statement is true for you.</p>
+                        
+            //             ${[
+            //                 "My ideas are usually better than other people's ideas.",
+            //                 "For the most part, others have more to learn from me than I have to learn from them.",
+            //                 "When I am really confident in a belief, there is very little chance that belief is wrong.",
+            //                 "I'd rather rely on my own knowledge about most topics than turn to others for expertise.",
+            //                 "On important topics, I am not likely to be swayed by the viewpoints of others.",
+            //                 "Listening to perspectives of others seldom changes my important opinions."
+            //             ].map((statement, idx) => `
+            //                 <div class="mb-6">
+            //                     <p class="mb-3 text-center">${statement}</p>
+            //                     <div class="option-grid">
+            //                         ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="humility_${idx+1}" value="${i+1}" id="humility_${idx+1}_${i}" class="hidden"><label for="humility_${idx+1}_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
+            //                     </div>
+            //                 </div>
+            //             `).join('')}
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },           
+// PART 1: CONFORMITY/ADVICE SCALE
+            {
+                id: 'conformity_scale',
+                html: `
+                    <div class="space-y-8">
+                        <p class="font-medium text-center">Please indicate how much you agree or disagree with each of the following statements.</p>
+
+                        ${[
+                            "I often rely on, and act upon, the advice of others.",
+                            "I would like to be the last one to change my opinion in a heated argument on a controversial topic.",
+                            "Generally, I'd rather give in and go along for the sake of peace than struggle to have my way.",
+                            "I tend to follow family tradition in making political decisions.",
+                            "Basically, my friends are the ones who decide what we do together.",
+                            "A charismatic and eloquent speaker can easily influence and change my ideas.",
+                            "I am more independent than conforming in my ways.",
+                            "If someone is very persuasive, I tend to change my opinion and go along with them.",
+                            "I don't give in to others easily.",
+                            "I tend to rely on others when I have to make an important decision quickly.",
+                            "I prefer to make my own way in life rather than find a group I can follow."
+                        ].map((statement, idx) => `
+                            <div class="mb-6">
+                                <p class="mb-3 text-center">${statement}</p>
+                                <div class="option-grid">
+                                    ${['-4', '-3', '-2', '-1', '0', '+1', '+2', '+3', '+4'].map((opt, i) => `
+                                        <div>
+                                            <input type="radio" name="conformity_${idx+1}" value="${opt}" id="conformity_${idx+1}_${i}" class="hidden">
+                                            <label for="conformity_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem;">
+                                                <span class="text-sm font-semibold">${opt}</span>
+                                            </label>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },          
+// PART 1: CONSPIRACY BELIEFS
+            {
+                id: 'conspiracy_beliefs',
+                html: `
+                    <div class="space-y-8">
+                    <p class="font-medium text-center">Please indicate how much you agree or disagree with each of the following statements.</p>
+                        ${[
+                            "The government permits or perpetrates acts of terrorism on its own soil, disguising its involvement.",
+                            "Evidence of alien contact is being concealed from the public.",
+                            "New and advanced technology which would harm current industry is being suppressed.",
+                            "Certain significant events have been the result of the activity of a small group who secretly manipulate world events.",
+                            "Experiments involving new drugs or technologies are routinely carried out on the public without their knowledge or consent."
+                        ].map((statement, idx) => `
+                            <div class="mb-6">
+                                <p class="mb-3 text-center">${statement}</p>
+                                <div class="option-grid">
+                                    ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="gcb_${idx+1}" value="${i+1}" id="gcb_${idx+1}_${i}" class="hidden"><label for="gcb_${idx+1}_${i}" class="option-button">${opt}</label></div>`).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },              
+            // {
+            //     id: 'ai_abilities',
+            //     html: `
+            //         <div class="space-y-8">
+            //             <p class="text-gray-700 text-left">In the following, you will read descriptions of different abilities that one can have when dealing with artificial intelligence. These abilities can be more or less pronounced. Please rate yourself: How pronounced are your abilities?</p>
+            //             <p class="text-gray-700 text-left">A value of <b>0</b> means that an ability is <b>not at all or hardly pronounced</b>.<br>A value of <b>10</b> means that an ability is <b>very well or (almost) perfectly pronounced</b>.</p>
+                                                
+            //             ${[
+            //                 "I can tell if I am dealing with an application based on artificial intelligence.",
+            //                 "I can program new applications in the field of \"artificial intelligence\".",
+            //                 "Although there are often new AI applications, I manage to always be \"up-to-date\".",
+            //                 "I can handle it when interactions with AI frustrate or frighten me.",
+            //                 "I can weigh the consequences of using AI for society.",
+            //                 "I can design new AI applications.",
+            //                 "I can use artificial intelligence meaningfully to achieve my goals.",
+            //                 "I can also usually solve strenuous and complicated tasks when working with artificial intelligence well.",
+            //                 "I can prevent an AI from influencing me in my decisions.",
+            //                 "I can assess what advantages and disadvantages the use of an artificial intelligence entails."
+            //             ].map((statement, idx) => `
+            //                 <div class="mb-6">
+            //                     <p class="mb-3 text-center">${statement}</p>
+            //                     <div class="option-grid" style="grid-template-columns: repeat(11, 1fr); gap: 0.25rem;">
+            //                         ${[ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ].map((opt, i) => `
+            //                             <div style="min-width: 32px;">
+            //                                 <input type="radio" name="ai_ability_${idx+1}" value="${opt}" id="ai_ability_${idx+1}_${i}" class="hidden">
+            //                                 <label for="ai_ability_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.75rem;">
+            //                                     <span class="text-sm font-semibold">${opt}</span>
+            //                                 </label>
+            //                             </div>
+            //                         `).join('')}
+            //                     </div>
+            //                 </div>
+            //             `).join('')}
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },
+            // PART 0: GABOR ORIENTATION TASK (GOT)
+            {
+                id: 'got_instructions',
+                html: `
+                    <div class="text-gray-700 space-y-4">
+                        <p>In this section, you will be presented with scrambled images very rapidly. Please do your best to identify what is in the scrambled images.</p>
+                        <p>After each image disappears, you will be asked to choose between two options representing what might have been in the image.</p>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                         <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                        <button onclick="startGOTTrial()" class="btn btn-primary">Start Task</button>
+                    </div>
+                    
+                `
+            },
+            {
+                id: 'got_task' // Content generated by renderGOTStep()
+            },
+            {
+                id: 'got_confidence_est',
+                html: `
+                    <div class="space-y-4 text-left text-gray-700">
+                        <p>You just saw 10 images. Because there were only two answer options on each of the images, anyone  who would have guessed randomly would have (on average) picked the correct option 5 out of 10 times.</p>
+                        <p class="font-medium mt-4">For how many of the images do you believe you chose the right options, beyond the chance level of 5, if any?</p>
+                        <p>[Please enter a number from 0 to 5 to indicate how many of the images you think you got correct above chance.]</p>
+                        <div class="mt-4 flex justify-center">
+                            <input type="number" name="got_est" id="got_est" min="0" max="5" step="1" class="w-1/4 p-2 border border-gray-300 rounded-md text-center">
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+             { // Moved CRT step here
+                id: 'crt',
+                getHTML: () => {
+                    const crtQuestions = [
+                        { id: 'crt1', label: "If you're running a race and you pass the person in second place, what place are you in?" },
+                        { id: 'crt2', label: "A farmer had 15 sheep and all but 8 died. How many are left?" },
+                        { id: 'crt3', label: "Emily’s father has three daughters. The first two are named April and May. What is the third daughter’s name?" },
+                        { id: 'crt4', label: "How many cubic feet of dirt are there in a hole that is 3’ deep x 3’ wide x 3’ long?" }
+                    ];
+
+                    // Shuffle the questions array (Fisher-Yates shuffle)
+                    for (let i = crtQuestions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [crtQuestions[i], crtQuestions[j]] = [crtQuestions[j], crtQuestions[i]];
+                    }
+
+                    const questionsHTML = crtQuestions.map(q => `
+                        <div>
+                            <label class="block font-medium mb-1">${q.label}</label>
+                            <input type="text" name="${q.id}" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    `).join('');
+
+                    return `
+                        <h1 class="question-title">Final Questions Before the Main Task</h1>
+                        <div class="space-y-6">
+                            ${questionsHTML}
+                        </div>
+                        <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    `;
+                }
+            },
+
+            // PART 3: THE HEADLINE EVALUATION TASK
+            {
+                id: 'task_transition',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-600 mb-6">Now for the main part of the study. You will be presented with a series of news headlines as they would appear on social media and asked to evaluate them.</p>
+                        <p>For each headline, you will be asked to rate the following:</p>
+                        <br>
+                        <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
+                            <li class="mb-2">Is the headline accurate?</li>
+                            <li class="mb-2">How confident are you in your judgment?</li>
+                            <li>Have you seen or heard about the headline before?</li>
+                        </ol>
+                        <br>
+                        <p>Let's do a practice round of this next.</p>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'practice_round' // This step's content is generated by renderPracticeRoundStep()
+            },
+            {
+                id: 'selfSelectAdvisor',
+                condition: (c) => c === 'Self-select',
+                getHTML: () => {
+                    const options = [
+                        // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
+                        { id: 'ss_humans', value: 'Human-only', text: 'Receive advice from six different humans.', description: 'You will receive advice from six different humans.' },
+                        { id: 'ss_llms', value: 'LLM-only', text: 'Receive advice from six different AI chat bots (like ChatGPT or Gemini).', description: 'You receive advice from six different AI chat bots (like ChatGPT or Gemini).' },
+                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Receive advice from three different humans and three different AI chat bots.', description: 'You will receive advice from three different humans and three different AI chat bots.' },
+                        { id: 'ss_none', value: 'Control', text: 'No advice.', description: 'You will not receive any advice.' }
+                    ];
+
+                    // Shuffle the options array (Fisher-Yates shuffle)
+                    for (let i = options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [options[i], options[j]] = [options[j], options[i]];
+                    }
+
+                    const optionsHTML = options.map(opt => `
+                        <div>
+                            <input type="radio" id="${opt.id}" name="self_select" value="${opt.value}" class="hidden">
+                            <label for="${opt.id}" class="option-label">
+                                <b>${opt.text}</b>
+                            </label>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <h1 class="question-title">Your Advisors</h1>
+                        <p class="mb-6">For the upcoming headlines, you can choose the advisor you would like to receive advice from. Please read the descriptions and make your selection.</p>
+                        <div id="self-select-options" class="space-y-4">
+                           ${optionsHTML}
+                        </div>
+                        <div id="self-select-error" class="text-red-500 text-sm mt-2 text-center hidden">Please make a selection to continue.</div>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="handleSelfSelectAdvisor()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },
+            {
+                id: 'conditionInfo',
+                condition: (c) => ['Fact-checker', 'Human-only', 'LLM-only', 'Hybrid'].includes(selfSelectChoice || c),
+                getHTML: () => {
+                    const adviceCondition = selfSelectChoice || userCondition;
+                    let info = '';
+                    switch(adviceCondition) {
+                        case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization with each headline. A red icon indicates that the fact-checker deemed this headline to be inaccurate. A green icon indicates an accurate judgment (meaning the headline comes from a credible source).</p>`; break;
+                        case 'Human-only': info = `<p class="mb-4">For each headline, you will see how each of the six human raters judged its accuracy. A red icon indicates the headline was judged as inaccurate, and a green icon indicates the headline was judged as accurate.</p>`; break;
+                        case 'LLM-only': info = `<p class="mb-4">For each headline, you will see how each of the six AI chat bots judged its accuracy. An icon presented in green will indicate that the headline was judged as accurate, whereas an icon in red will indicate that the headline was judged as inaccurate.</p>`; break;
+                        case 'Hybrid': info = `<p class="mb-4">For each headline, you will see how three different humans and three different AI chatbots  judged its accuracy. A red icon indicates the headline was judged as inaccurate (either by a human or an AI), a green icon indicates the headline was judged as accurate.</p>`; break;
+                    }
+                    const exampleHTML = getAdviceExampleHTML(adviceCondition);
+                    return `
+                        <div>
+                            <h1 class="question-title">Your Advisors</h1>
+                            <div class="text-gray-700 space-y-4 my-8">
+                                ${info}
+                                ${exampleHTML}
+                                <p class="text-gray-600 mt-6">This advice will be displayed above each headline.</p>
+                            </div>
+                            <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                        </div>
+                    `;
+                }
+            },            
+            // PART 3: HEADLINE TASK
+            {
+                id: 'final_instructions',
+                getHTML: () => `
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold mb-4">All Set!</h1>
+                        <p class="text-gray-600 mb-6">The practice round is over. You will now see 32 news headlines. Please try your best to evaluate them.</p>
+                        <div class="flex justify-center">
+                            <button onclick="nextStep()" class="btn btn-primary">Start</button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'headlineLoop' // This step's content is generated by renderHeadlineStep()
+            },            
+            // PART 4: POST-TASK FOLLOW-UP
+            {
+                id: 'transition',
+                html: `
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold mb-4">Thanks!</h1>
+                        <p class="text-gray-600 mb-6">You've rated all the headlines. Now, we have just a few final questions. Please remember that all your responses will be treated anonymously.</p>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
+            // PART 1: BASELINE TRUST PERCEPTIONS
+            {
+                id: 'advisor_trust_post', // Renamed ID for clarity
+                condition: () => (selfSelectChoice || userCondition) !== 'Control',
+                html: `
+                    <div class="space-y-8">
+                        <p class="text-gray-700 text-left">On a scale going from <b>0 (Not at all)</b> to <b>7 (Very)</b>, how much do you think the advisor group you received advice from has the following attributes?</p>
+
+                        ${[ // Performance Trust Subscale Items
+                            'reliable', 'predictable', 'dependable', 'consistent', // Reliable subscale
+                            'competent', 'skilled', 'capable', 'meticulous'      // Competent subscale
+                        ].map((item, idx) => `
+                            <div class="mb-4">
+                                <p class="mb-3 text-center capitalize font-medium">${item}</p>
+                                <div class="option-grid" style="grid-template-columns: repeat(8, 1fr); gap: 0.25rem;">
+                                    ${[ '0', '1', '2', '3', '4', '5', '6', '7' ].map((opt, i) => `
+                                        <div style="min-width: 36px;">
+                                            <input type="radio" name="advisor_trust_${item}" value="${opt}" id="adv_trust_${item}_${i}" class="hidden">
+                                            <label for="adv_trust_${item}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.75rem;">
+                                                <span class="text-sm font-semibold">${opt}</span>
+                                            </label>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },            
+            {
+                id: 'headline_perception',
+                html: `
+                    <div class="space-y-8">
+                        
+                        <!-- Question 1: Relevance -->
+                        <div class="mb-6 pt-4 border-t">
+                            <p class="mb-3 text-center font-medium">The headlines I evaluated were relevant to me.</p>
+                            <div class="option-grid">
+                                ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="headline_relevance" value="${i+1}" id="hl_rel_${i}" class="hidden"><label for="hl_rel_${i}" class="option-button">${opt}</label></div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            // {
+            //     id: 'postStudy',
+            //     condition: () => (selfSelectChoice || userCondition) !== 'Control',
+            //     html: `
+            //         <h1 class="question-title">Questions on Advice</h1>
+            //         <div class="space-y-8">
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">How helpful did you find the advice you receive while rating the headlines?</p>
+            //                 <div class="option-grid">
+            //                 ${['Not at all<br>helpful', 'Slightly<br>helpful', 'Moderately<br>helpful', 'Very<br>helpful', 'Extremely<br>helpful'].map((o, i) => `<div><input type="radio" name="helpfulness" value="${o.replace('<br>', ' ')}" id="help_${i}" class="hidden"><label for="help_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">How much did you trust the advice you receive?</p>
+            //                 <div class="option-grid">
+            //                  ${['Did not trust<br>it at all', 'Slightly<br>trusted it', 'Moderately<br>trusted it', 'Mostly<br>trusted it', 'Completely<br>trusted it'].map((o, i) => `<div><input type="radio" name="trust" value="${o.replace('<br>', ' ')}" id="trust_${i}" class="hidden"><label for="trust_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+            //              <div>
+            //                 <p class="font-medium mb-3 text-center">To what extent did the advice you receive influence your own accuracy ratings?</p>
+            //                 <div class="option-grid">
+            //                  ${['Did not influence<br>me at all', 'Slightly<br>influenced me', 'Moderately<br>influenced me', 'Heavily<br>influenced me', 'Completely determined<br>my rating'].map((o, i) => `<div><input type="radio" name="influence" value="${o.replace('<br>', ' ')}" id="inf_${i}" class="hidden"><label for="inf_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+            //         </div>
+            //          <div class="flex justify-between mt-8">
+            //             <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+            //             <button onclick="nextStep()" class="btn btn-primary">Next</button>
+            //         </div>
+            //     `
+            // },            
+            // PART 4: DEBUNKING & DEBRIEF
+            {
+                id: 'debunking',
+                condition: () => allHeadlines.some(h => !h.isTrue), // Only show if there were false headlines
+                getHTML: () => `
+                    <h1 class="text-2xl font-bold text-center mb-2">Debrief</h1>
+                        <p class="text-center mb-6">This study aims to understand how different types of advice affect people's ability to judge the accuracy of news headlines. Some of the headlines you saw were false. The fact-checks for these false headlines are presented below.</p>
+                    <div id="debunkDisplay" class="flex flex-col items-center space-y-4 bg-red-50 border-2 border-red-200 p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold text-red-700 mb-4">THIS HEADLINE IS FALSE.</h3>
+                        <img id="debunkImage" src="" alt="Debunked headline image" class="max-h-64 rounded-lg shadow" />
+                        <div id="debunkExplanation" class="text-md text-gray-700 text-center pt-4"></div>
+                    </div>
+                    <div class="flex justify-center items-center mt-8 w-full max-w-md mx-auto">
+                        <button id="debunkNav" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
+            // {
+            //     id: 'debriefing',
+            //     getHTML: () => {
+            //         return `
+            //             <h1 class="text-2xl font-bold text-center mb-4">Survey Complete!</h1>
+            //             <p class="text-center mb-4">Thank you for your participation!</p>
+            //             <p class="text-center mb-6">This study aims to understand how different types of advice affect people's ability to judge the accuracy of news headlines. Some of the headlines you saw were false. Your contribution is valuable to our research.</p>
+            //             <div class="text-center text-sm text-gray-500 mt-8">You may now close this window.</div>
+            //         `;
+            //     }
+            // },
+        ];
+        
+        /**
+         * Generates an array of ratings for a crowd.
+         * @param {number} count The number of raters in the crowd.
+         * @param {boolean} isTrueHeadline The actual veracity of the headline.
+         * @returns {boolean[]} An array of true/false ratings.
+         */
+        function generateCrowdRatings(count, isTrueHeadline) {
+            const ratings = [];
+            const crowdAccuracy = 0.83; // Approx. 5 out of 6 are correct
+            for (let i = 0; i < count; i++) {
+                const isRaterCorrect = Math.random() < crowdAccuracy;
+                ratings.push(isRaterCorrect ? isTrueHeadline : !isTrueHeadline);
+            }
+            return ratings.sort(() => Math.random() - 0.5); // Shuffle for randomness
+        }
+
+        function getAdviceExampleHTML(condition) {
+            let exampleTitle = '';
+            let exampleIconsHTML = '';
+            let exampleText = '';
+
+            switch(condition) {
+                case 'Fact-checker':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                    exampleText = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
+                    exampleIconsHTML = `<img src="${ICONS.human.green}" alt="Fact-check rating" class="advice-icon">`;
+                    break;
+                case 'Human-only':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                     exampleText = `4 out of 6 human raters judged the headline as <strong>Accurate</strong>.`;
+                    exampleIconsHTML = [...Array(4)].map(() => `<img src="${ICONS.human.green}" class="advice-icon">`).join('') +
+                                       [...Array(2)].map(() => `<img src="${ICONS.human.red}" class="advice-icon">`).join('');
+                    break;
+                case 'LLM-only':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                    exampleText = `5 out of 6 AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                    exampleIconsHTML = [...Array(5)].map(() => `<img src="${ICONS.robot.green}" class="advice-icon">`).join('') +
+                                       `<img src="${ICONS.robot.red}" class="advice-icon">`;
+                    break;
+                case 'Hybrid':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                    exampleText = `2 out of 3 human raters judged the headline as <strong>Accurate</strong>; 3 out of 3 AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                    exampleIconsHTML = `<img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.red}" class="advice-icon">` +
+                                       `<img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon">`;
+                    break;
+            }
+
+            if (exampleTitle) {
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 mt-4 text-center">
+                        <p class="mb-2 text-sm">${exampleTitle}</p>
+                        <div class="text-xs mb-2">${exampleText}</div>
+                        <div class="icon-container" style="transform: scale(0.9); justify-content: center;">
+                            ${exampleIconsHTML}
+                        </div>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function getAdviceHTML(headlineIndex) {
+            const condition = selfSelectChoice || userCondition;
+            if (condition === 'Control') return '';
+
+            const isTrueHeadline = allHeadlines[headlineIndex].isTrue;
+            const ratings = headlineAdviceRatings[headlineIndex]; // Get pre-generated ratings
+            let adviceTitle = '';
+            let iconsHTML = '';
+
+            switch (condition) {
+                case 'Fact-checker':
+                    if (isTrueHeadline) {
+                        adviceTitle = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
+                    } else {
+                        adviceTitle = `This headline is from a non-credible news source and is rated as <strong>inaccurate</strong> by a fact-checker.`;
+                    }
+                    const iconSrc = isTrueHeadline ? ICONS.human.green : ICONS.human.red;
+                    iconsHTML = `<img src="${iconSrc}" alt="Fact-check rating" class="advice-icon">`;
+                    break;
+                
+                case 'Human-only':
+                    const humanRatings = ratings.human; // Use stored ratings
+                    const humanAccurateCount = humanRatings.filter(r => r).length;
+                    adviceTitle = `${humanAccurateCount} out of 6 humans rated the headline as <strong>Accurate</strong>.`;
+                    iconsHTML = [...humanRatings].sort((a, b) => b - a).map(rating => 
+                        `<img src="${rating ? ICONS.human.green : ICONS.human.red}" alt="Human rating" class="advice-icon">`
+                    ).join('');
+                    break;
+
+                case 'LLM-only':
+                    const llmRatings = ratings.llm; // Use stored ratings
+                    const llmAccurateCount = llmRatings.filter(r => r).length;
+                    adviceTitle = `${llmAccurateCount} out of 6 AI chat bots rated the headline as <strong>Accurate</strong>.`;
+                    iconsHTML = [...llmRatings].sort((a, b) => b - a).map(rating => 
+                        `<img src="${rating ? ICONS.robot.green : ICONS.robot.red}" alt="AI rating" class="advice-icon">`
+                    ).join('');
+                    break;
+
+                case 'Hybrid':
+                    const hybridRatings = ratings.hybrid; 
+                    
+                    // Count human accurate ratings
+                    const humanRatingss = hybridRatings.filter(r => r.type === 'human');
+                    const humanAccurateCounts = humanRatingss.filter(r => r.rating).length;
+
+                    // Count AI accurate ratings
+                    const llmRatingss = hybridRatings.filter(r => r.type === 'robot');
+                    const llmAccurateCounts = llmRatingss.filter(r => r.rating).length;
+
+                    adviceTitle = `${humanAccurateCounts} out of 3 humans rated the headline as <strong>Accurate</strong>; ${llmAccurateCounts} out of 3 AI chat bots rated the headline as <strong>Accurate</strong>.`;
+                    
+                    iconsHTML = [...hybridRatings].sort((a, b) => {
+                        // Primary sort: by type (human then robot)
+                        if (a.type !== b.type) {
+                            return a.type === 'human' ? -1 : 1;
+                        }
+                        // Secondary sort: by rating (green then red)
+                        return b.rating - a.rating; // true (1) comes before false (0)
+                    }).map(item => {
+                        const iconSet = ICONS[item.type];
+                        const iconSrc = item.rating ? iconSet.green : iconSet.red;
+                        return `<img src="${iconSrc}" alt="${item.type} rating" class="advice-icon">`;
+                    }).join('');
+                    break;
+            }
+            
+            return `
+                <div class="advice-card">
+                    <p class="mb-2">${adviceTitle}</p>
+                        <div class="icon-container">
+                        ${iconsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHeadlineStep() {
+            const totalQuestions = allHeadlines.length * 3;
+            const questionsCompleted = currentHeadlineIndex * 3 + currentQuestionInLoop;
+            const progress = (questionsCompleted / totalQuestions) * 100;
+            
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('progress-text').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').innerText = `Headline ${currentHeadlineIndex + 1} of ${allHeadlines.length}`;
+            
+            const headlineObj = allHeadlines[currentHeadlineIndex];
+            const adviceHTML = getAdviceHTML(currentHeadlineIndex);
+
+            const headlineStimulusHTML = `
+                <div class="mb-4 flex flex-col items-center justify-center">
+                    <img src="${headlineObj.img}" alt="News Stimulus" class="max-w-full max-h-96 rounded shadow-md" />
+                </div>
+            `;
+
+            let questionHTML = '';
+            switch(currentQuestionInLoop) {
+                case 0: // Veracity
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <div class="option-grid">
+                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
+                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
+                            </div>
+                        </div>`;
+                    break;
+                case 1: // Confidence
+                    const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
+                    const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                            <div class="option-grid">
+                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+                case 2: // Familiarity
+                     questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
+                            <div class="option-grid">
+                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+            }
+
+            app.innerHTML = `
+                ${adviceHTML}
+                ${headlineStimulusHTML}
+                <div class="space-y-8 mt-8">${questionHTML}</div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="${(currentHeadlineIndex === 0 && currentQuestionInLoop === 0) ? 'prevStep()' : 'prevHeadline()'}" class="btn btn-secondary">Back</button>
+                    <button onclick="nextHeadline()" class="btn btn-primary">Next</button>
+                </div>
+            `;
+
+            // Auto-proceed to next question when an answer is selected
+            const radios = app.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    setTimeout(() => {
+                        nextHeadline();
+                    }, 150); // slight delay for UI feedback
+                });
+            });
+        }
+
+        function renderPracticeRoundStep() {
+            // No progress bar for practice
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('progress-text').classList.add('hidden');
+            
+            const headlineStimulusHTML = `
+                <div class="mb-4 flex flex-col items-center justify-center">
+                    <img src="${practiceHeadline.image}" alt="Practice News Stimulus" class="max-w-full max-h-96 rounded shadow-md" />
+                </div>
+            `;
+
+            let questionHTML = '';
+            // Same question logic as renderHeadlineStep
+            switch(currentPracticeQuestion) {
+                case 0: // Veracity
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <div class="option-grid">
+                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
+                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
+                            </div>
+                        </div>`;
+                    break;
+                case 1: // Confidence
+                    const practiceJudgment = surveyData.practice?.veracity || '';
+                    const judgmentText = practiceJudgment ? `[Your judgment: "<b>${practiceJudgment}</b>"]` : '';
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                            <div class="option-grid">
+                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+                case 2: // Familiarity
+                     questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
+                            <div class="option-grid">
+                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+            }
+
+            app.innerHTML = `
+                ${headlineStimulusHTML}
+                <div class="space-y-8 mt-8">${questionHTML}</div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="prevPracticeQuestion()" class="btn btn-secondary">Back</button>
+                    <button onclick="nextPracticeQuestion()" class="btn btn-primary">Next</button>
+                </div>
+            `;
+
+            // Auto-proceed to next question when an answer is selected
+            const radios = app.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    setTimeout(() => {
+                        nextPracticeQuestion();
+                    }, 150); // slight delay for UI feedback
+                });
+            });
+        }
+        
+        // --- GOT Task Logic ---
+        function startGOTTrial() {
+            // Set currentStep to the GOT task step index
+            currentStep = surveySteps.findIndex(step => step.id === 'got_task');
+            if (currentStep === -1) {
+                console.error("GOT task step not found!");
+                 // Attempt to find the step after instructions as a fallback
+                const instructionIndex = surveySteps.findIndex(step => step.id === 'got_instructions');
+                if (instructionIndex !== -1 && instructionIndex + 1 < surveySteps.length) {
+                    currentStep = instructionIndex + 1;
+                } else {
+                     currentStep = 1; // Default fallback if really lost
+                     console.warn("Falling back to assuming GOT task is at index 1.");
+                }
+            }
+
+            // Shuffle GOT items at the start of the task
+            for (let i = got_items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [got_items[i], got_items[j]] = [got_items[j], got_items[i]];
+            }
+            currentGOTTrial = 0;
+            surveyData.got_answers = []; // Clear previous answers if restarting
+            renderGOTStep();
+        }
+
+        function renderGOTStep() {
+            const trialData = got_items[currentGOTTrial];
+            
+            // Phase 1: Show image briefly
+            app.innerHTML = `
+                <div class="flex justify-center items-center h-96"> 
+                    <img id="got_image_display" src="${trialData.image}" alt="Scrambled Image" class="max-h-full max-w-full"/>
+                </div>
+            `;
+            
+            gotStartTime = Date.now(); // Record start time when image appears
+
+            // Hide image after a short duration (e.g., 500ms) and show questions
+            setTimeout(() => {
+                showGOTQuestions(trialData);
+            }, 250); // Adjust duration as needed
+        }
+
+        function showGOTQuestions(trialData) {
+            app.innerHTML = `
+                <div class="space-y-8">
+                    <div>
+                        <p class="font-medium mb-3 text-center">Was that a ${trialData.field1} or a ${trialData.field2}?</p>
+                        <div class="option-grid grid grid-cols-2">
+                             <div><input type="radio" name="got_choice" value="${trialData.field1}" id="got_choice_1" class="hidden"><label for="got_choice_1" class="option-button">${trialData.field1}</label></div>
+                             <div><input type="radio" name="got_choice" value="${trialData.field2}" id="got_choice_2" class="hidden"><label for="got_choice_2" class="option-button">${trialData.field2}</label></div>
+                        </div>
+                    </div>
+                    <!-- <div>
+                        <p class="font-medium mb-3 text-center">How confident are you that you are correct?</p>
+                        <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
+                            <output for="got_confidence_slider" id="got_slider_value_display" class="mb-2">Confidence: 50</output>
+                            <input type="range" name="got_confidence" id="got_confidence_slider" min="0" max="100" step="1" value="50" oninput="document.getElementById('got_slider_value_display').textContent = 'Confidence: ' + this.value" class="w-full">
+                            <div class="flex justify-between w-full text-sm text-gray-600 mt-2">
+                                <span>Not at all confident (0)</span>
+                                <span>Highly confident (100)</span>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+                 <div class="flex justify-center mt-8">
+                    <button onclick="nextGOTTrial()" class="btn btn-primary">Next</button>
+                 </div>
+            `;
+        }
+
+        function nextGOTTrial() {
+            const endTime = Date.now();
+            const reactionTime = endTime - gotStartTime;
+
+            const choiceInput = app.querySelector('input[name="got_choice"]:checked');
+            // const confidenceInput = app.querySelector('input[name="got_confidence"]');
+            
+            const trialResult = {
+                trial: currentGOTTrial + 1,
+                image: got_items[currentGOTTrial].image,
+                option1: got_items[currentGOTTrial].field1,
+                option2: got_items[currentGOTTrial].field2,
+                choice: choiceInput ? choiceInput.value : 'not_answered',
+                // confidence: confidenceInput ? confidenceInput.value : 'not_answered',
+                confidence: 'N/A (commented out)',
+                reactionTime: reactionTime
+            };
+            surveyData.got_answers.push(trialResult);
+
+            currentGOTTrial++;
+            if (currentGOTTrial >= got_items.length) {
+                // Move to the next main survey step after GOT is done
+                currentStep++; 
+                renderStep();
+            } else {
+                renderGOTStep(); // Render the next GOT trial
+            }
+        }
+        // --- End GOT Task Logic ---
+
+        let debunkableHeadlines = [];
+        let currentDebunkIndex = 0;
+
+        function renderDebunkStep() {
+            debunkableHeadlines = allHeadlines.filter(h => !h.isTrue && h.text !== "Attention check");
+            currentDebunkIndex = 0;
+            
+            app.innerHTML = surveySteps.find(s => s.id === 'debunking').getHTML();
+
+            document.getElementById('debunkNav').addEventListener('click', handleDebunkNav);
+            
+            showDebunkItem();
+        }
+
+        function showDebunkItem() {
+            if (debunkableHeadlines.length === 0) return;
+
+            const item = debunkableHeadlines[currentDebunkIndex];
+            
+            const imgEl = document.getElementById('debunkImage');
+            const explanationEl = document.getElementById('debunkExplanation');
+            const navBtn = document.getElementById('debunkNav');
+
+            imgEl.src = item.img;
+            explanationEl.innerHTML = item.debunk;
+
+            const isLastItem = currentDebunkIndex === debunkableHeadlines.length - 1;
+            if (isLastItem) {
+                navBtn.textContent = 'End of Study';
+            } else {
+                navBtn.textContent = 'Next';
+            }
+        }
+
+        function nextDebunk() {
+            if (currentDebunkIndex < debunkableHeadlines.length - 1) {
+                currentDebunkIndex++;
+                showDebunkItem();
+            }
+        }
+
+        function handleDebunkNav() {
+            const isLastItem = currentDebunkIndex === debunkableHeadlines.length - 1;
+            if (isLastItem) {
+                resetSurvey(); 
+            } else {
+                nextDebunk();
+            }
+        }
+
+        function resetSurvey() {
+            // Reset all state variables
+            currentStep = 0;
+            currentHeadlineIndex = 0;
+            currentQuestionInLoop = 0;
+            currentPracticeQuestion = 0;
+            userCondition = '';
+            selfSelectChoice = '';
+            surveyData = { answers: {} };
+            newsSourceOrder = [];
+
+            // Reset UI elements
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('progress-text').classList.add('hidden');
+            const noteContainer = document.getElementById('co-author-note-container');
+            if (noteContainer) noteContainer.classList.add('hidden');
+            app.innerHTML = `<p class="text-center text-gray-500">Please select a condition from the test menu above to begin the survey.</p>`;
+        }
+
+        function renderStep() {
+            const stepData = surveySteps[currentStep];
+            if (!stepData) return;
+
+             // Show/hide the co-author note
+            const noteContainer = document.getElementById('co-author-note-container');
+            if (noteContainer) {
+                const noteText = coAuthorNotes[stepData.id];
+                if (noteText) {
+                    noteContainer.querySelector('p').innerHTML = `<span class="font-bold">Co-author note:</span> ${noteText}`;
+                    noteContainer.classList.remove('hidden');
+                } else {
+                    noteContainer.classList.add('hidden');
+                }
+            }
+
+            if (stepData.condition) {
+                const conditionMet = typeof stepData.condition === 'function' ? stepData.condition(userCondition) : stepData.condition === userCondition;
+                if (!conditionMet) {
+                    currentStep++;
+                    renderStep();
+                    return;
+                }
+            }
+            
+            if (stepData.id === 'got_task') {
+                // GOT task rendering is handled by its specific functions
+                // This prevents renderStep from overwriting the GOT image display prematurely
+                return; 
+            }
+            
+            if (stepData.id === 'practice_round') {
+                renderPracticeRoundStep();
+                return;
+            }
+
+            if (stepData.id === 'headlineLoop') {
+                renderHeadlineStep();
+                return;
+            }
+
+            if (stepData.id === 'debunking') {
+                renderDebunkStep();
+                return;
+            }
+            
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('progress-text').classList.add('hidden');
+
+            let content = stepData.html || stepData.getHTML();
+            app.innerHTML = content;
+
+            // Add event listeners for dynamic content
+        }
+        
+        function handleAdvisorPreference() {
+            const selected = document.querySelector('input[name="advisor_preference"]:checked');
+            if (selected) {
+                surveyData.advisorPreference = selected.value;
+            } else {
+                surveyData.advisorPreference = 'Not answered';
+            }
+            nextStep();
+        }
+
+        function handleSelfSelectAdvisor() {
+            const selected = document.querySelector('input[name="self_select"]:checked');
+            const errorDiv = document.getElementById('self-select-error');
+            if (selected) {
+                errorDiv.classList.add('hidden');
+                // This is where we set the choice for the rest of the survey
+                selfSelectChoice = selected.value;
+                surveyData.selfSelectChoice = selfSelectChoice;
+                // Since this is their only choice, it's also their preference
+                surveyData.advisorPreference = selfSelectChoice;
+                nextStep();
+            } else {
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function saveData(stepId) {
+             const inputs = app.querySelectorAll('input:checked, input[type="text"], input[type="number"]');
+             if (stepId.startsWith('headlineLoop')) {
+                 if (inputs.length > 0) {
+                    const input = inputs[0];
+                    if (!surveyData.answers[currentHeadlineIndex]) {
+                        surveyData.answers[currentHeadlineIndex] = {};
+                    }
+                    surveyData.answers[currentHeadlineIndex][input.name] = input.value;
+                 }
+             } else {
+                 surveyData[stepId] = {};
+                 inputs.forEach(input => {
+                     if (input.type === 'checkbox') {
+                         if (!surveyData[stepId][input.name]) {
+                             surveyData[stepId][input.name] = [];
+                         }
+                         surveyData[stepId][input.name].push(input.value);
+                     } else {
+                        surveyData[stepId][input.name] = input.value;
+                     }
+                 });
+             }
+        }
+        
+        function nextPracticeQuestion() {
+            const input = app.querySelector('input:checked');
+            if (input) {
+                if (!surveyData.practice) surveyData.practice = {};
+                surveyData.practice[input.name] = input.value;
+            }
+            currentPracticeQuestion++;
+            if (currentPracticeQuestion >= 3) {
+                currentStep++;
+                renderStep();
+            } else {
+                renderPracticeRoundStep();
+            }
+        }
+
+        function prevPracticeQuestion() {
+            if (currentPracticeQuestion > 0) {
+                currentPracticeQuestion--;
+                renderPracticeRoundStep();
+            } else {
+                prevStep();
+            }
+        }
+
+        function nextHeadline() {
+            saveData(`headlineLoop-q${currentQuestionInLoop}`);
+            currentQuestionInLoop++;
+            if (currentQuestionInLoop >= 3) {
+                currentHeadlineIndex++;
+                currentQuestionInLoop = 0;
+            }
+            if (currentHeadlineIndex >= allHeadlines.length) {
+                currentStep++;
+                renderStep();
+            } else {
+                renderHeadlineStep();
+            }
+        }
+        
+        function nextStep() {
+            const stepData = surveySteps[currentStep];
+            if (!stepData) return;
+
+            // Save data for the current step
+            saveData(stepData.id);
+
+            currentStep++;
+            renderStep();
+        }
+
+        function prevHeadline() {
+            currentQuestionInLoop--;
+            if (currentQuestionInLoop < 0) {
+                if (currentHeadlineIndex > 0) {
+                    currentHeadlineIndex--;
+                    currentQuestionInLoop = 2; // Go to the last question of the previous headline
+                } else {
+                    currentQuestionInLoop = 0; // Stay on the first question of the first headline
+                }
+            }
+            renderHeadlineStep();
+        }
+
+
+        function prevStep() {
+            let targetStep = currentStep - 1;
+
+            while (targetStep >= 0) {
+                const stepData = surveySteps[targetStep];
+                let conditionMet = true;
+                if (stepData.condition) {
+                    // Check if the condition for the target step is met
+                    conditionMet = typeof stepData.condition === 'function' 
+                        ? stepData.condition(userCondition) 
+                        : stepData.condition === userCondition;
+                }
+
+                if (conditionMet) {
+                    // If the step is valid, update currentStep and render it
+                    currentStep = targetStep;
+
+                    // Special handling if we're moving back to the headline loop
+                    if (stepData.id === 'headlineLoop') {
+                        currentHeadlineIndex = allHeadlines.length - 1;
+                        currentQuestionInLoop = 2; 
+                    }
+                    if (stepData.id === 'practice_round') {
+                        currentPracticeQuestion = 2;
+                    }
+                    
+                    renderStep();
+                    return; // Exit after rendering the valid step
+                }
+
+                // If condition not met, check the step before it
+                targetStep--;
+            }
+        }
+
+        function startCondition(condition) {
+            userCondition = condition;
+            surveyData.condition = condition;
+            setupHeadlines();
+
+            // Reset survey data
+            currentStep = 0;
+            currentHeadlineIndex = 0;
+            currentQuestionInLoop = 0;
+            currentPracticeQuestion = 0;
+            selfSelectChoice = '';
+            surveyData = { answers: {} };
+            newsSourceOrder = []; // Reset this too
+
+            renderStep();
+        }
+
+        // Enhanced: Track order of news source selection and show (1), (2), (3) on buttons
+        let newsSourceOrder = [];
+        function handleNewsSourceClick(e, idx) {
+            const input = e.target;
+            if (input.checked) {
+                if (newsSourceOrder.length >= 3) {
+                    input.checked = false;
+                    return;
+                }
+                newsSourceOrder.push(idx);
+            } else {
+                newsSourceOrder = newsSourceOrder.filter(i => i !== idx);
+            }
+            updateNewsSourceLabels();
+        }
+
+        function updateNewsSourceLabels() {
+            const labels = document.querySelectorAll('.news-source-label');
+            labels.forEach((label, i) => {
+                const order = newsSourceOrder.indexOf(i);
+                // Remove any previous numbering
+                const baseText = label.textContent.replace(/ \([123]\)$/,'');
+                if (order !== -1) {
+                    label.textContent = `${baseText} (${order+1})`;
+                } else {
+                    label.textContent = baseText;
+                }
+            });
+        }
+
+        function handleSocialPlatformClick(event) {
+            const clickedCheckbox = event.target;
+            const allPlatformCheckboxes = document.querySelectorAll('input[name="social_platforms"]');
+            const noneCheckbox = Array.from(allPlatformCheckboxes).find(cb => cb.value === 'None of these');
+            const otherCheckbox = Array.from(allPlatformCheckboxes).find(cb => cb.value === 'Other');
+            const otherWrapper = document.getElementById('social_platforms_other_wrapper');
+            
+            if (otherWrapper && otherCheckbox) {
+                otherWrapper.classList.toggle('hidden', !otherCheckbox.checked);
+            }
+            
+            if (!noneCheckbox) return;
+
+            const otherCheckboxes = Array.from(allPlatformCheckboxes).filter(cb => cb.value !== 'None of these');
+
+            if (clickedCheckbox.value === 'None of these' && clickedCheckbox.checked) {
+                // If "None of these" is checked, uncheck all others.
+                otherCheckboxes.forEach(cb => { cb.checked = false; });
+                // Also hide the 'Other' text field if it was open
+                if (otherWrapper) otherWrapper.classList.add('hidden');
+            } else if (clickedCheckbox.checked) {
+                // If any other platform is checked, uncheck "None of these".
+                noneCheckbox.checked = false;
+            }
+        }
+
+        function handleFakeVerifyClick(event) {
+            const allCheckboxes = document.querySelectorAll('input[name="fake_verify"]');
+            const otherCheckbox = Array.from(allCheckboxes).find(cb => cb.value === 'Other');
+            const otherWrapper = document.getElementById('fake_verify_other_wrapper');
+
+            if (otherWrapper && otherCheckbox) {
+                otherWrapper.classList.toggle('hidden', !otherCheckbox.checked);
+            }
+        }
+
+        // Add event listeners for the test menu
+        document.querySelectorAll('#test-menu .btn-test').forEach(button => {
+            button.addEventListener('click', () => {
+                const condition = button.dataset.condition;
+                if (condition) {
+                    startCondition(condition);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+

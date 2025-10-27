@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headline Evaluation Survey - Part 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .survey-container {
+            max-width: 1080px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 9999px;
+            height: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 9999px;
+            transition: width 0.3s ease-in-out;
+        }
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+        .option-label {
+            display: block;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            margin-bottom: 0.75rem;
+        }
+        .option-label:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        input[type="radio"]:checked + .option-label,
+        input[type="checkbox"]:checked + .option-label {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-primary:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        .hidden {
+            display: none;
+        }
+        .headline-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden; /* Ensures inner elements conform to border radius */
+        }
+        .advice-card {
+            color: #374151;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+        .advice-icon {
+            width: 56px;
+            height: 56px;
+        }
+        /* Test Menu Styles */
+        #test-menu {
+            max-width: 1080px;
+            margin: 1rem auto -1rem;
+            padding: 0.5rem;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .btn-test {
+            padding: 0.5rem 0.75rem;
+            background-color: #4b5563;
+            color: white;
+            border-radius: 6px;
+            margin: 0 4px;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-test:hover {
+            background-color: #1f2937;
+        }
+        .co-author-note {
+            margin-top: 2rem;
+            padding: 0.75rem;
+            background-color: #fffbe6; /* Tailwind amber-50 */
+            border: 1px solid #fef3c7; /* Tailwind amber-200 */
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #92400e; /* Tailwind amber-800 */
+        }
+        /* New Button Styles for Options */
+        .option-grid {
+            display: flex; /* Changed from grid to flex */
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .option-grid > div {
+            flex: 1 1 0; /* Allow flex items to grow and shrink */
+            min-width: 0; /* Allows shrinking below content size */
+        }
+        .option-button {
+            padding: 0.75rem 0.5rem; /* Reduced horizontal padding */
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-align: center;
+            background-color: #fff;
+            height: 100%; /* Ensure buttons in the same row are the same height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem; /* Made font smaller */
+            line-height: 1.25; /* Improved line-height for wrapped text */
+        }
+        input[type="radio"]:checked + .option-button,
+        input[type="checkbox"]:checked + .option-button {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            font-weight: 600;
+            color: #1e40af;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+     /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted #3b82f6;
+            cursor: help;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 320px;
+            background-color: #111827; /* Tailwind gray-900 */
+            color: #fff;
+            text-align: left;
+            font-weight: normal;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 10;
+            top: 135%; /* Changed from bottom to top */
+            left: 50%;
+            margin-left: -160px; /* Half of width */
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .tooltip .tooltip-text::after { /* Arrow */
+            content: "";
+            position: absolute;
+            bottom: 100%; /* Changed from top to bottom */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #111827 transparent; /* Flipped the arrow direction */
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+     /* Custom Slider Styles */
+#political_scale_slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px; /* Increased track height */
+    background: #e5e7eb; /* Tailwind gray-200 */
+    border-radius: 9999px;
+    outline: none;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+#political_scale_slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px; /* Increased thumb size */
+    height: 24px; /* Increased thumb size */
+    background: #3b82f6; /* Tailwind blue-500 */
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#political_scale_slider::-moz-range-thumb {
+    width: 24px; /* Increased thumb size */
+    height: 24px; /* Increased thumb size */
+    background: #3b82f6;
+    cursor: pointer;
+    border-radius: 50%;
+}
+    #image-preloader {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        left: -10000px;
+        top: -10000px;
+    }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="image-preloader"></div>
+
+    <div id="test-menu">
+        <span class="font-bold mr-2 text-sm text-gray-700">CO-AUTHORS-ONLY TEST MENU:</span>
+        <button data-condition="Control" class="btn-test">Control</button>
+        <button data-condition="Fact-checker" class="btn-test">Fact-checker</button>
+        <button data-condition="Human-only" class="btn-test">Human Crowd</button>
+        <button data-condition="LLM-only" class="btn-test">LLM Crowd</button>
+        <button data-condition="Hybrid" class="btn-test">Hybrid</button>
+        <button data-condition="Self-select" class="btn-test">Self-select</button>
+    </div>
+
+    <div class="survey-container">
+        <div id="progress-container" class="progress-bar-container hidden">
+            <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+        <div id="progress-text" class="text-center text-sm text-gray-500 mb-4 hidden"></div>
+
+        <div id="app">
+             <p class="text-center text-gray-500">Please select a condition from the test menu above to begin the survey.</p>
+        </div>
+    </div>
+
+    <div id="co-author-note-container" class="hidden" style="max-width: 1080px; margin: -1rem auto 1rem;">
+        <div class="co-author-note">
+            <p><span class="font-bold">Co-author note:</span> You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.</p>
+        </div>
+    </div>
+
+    <script>
+        const ICONS = {
+            human: {
+                green: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_w4QFNy2pstJUsj2',
+                red: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_Mv6qe25xNFhIP7a'
+            },
+            robot: {
+                green: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_VIDQNEyD9IxqSj4',
+                red: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_P75HBHEr1D5qLbf'
+            }
+        };
+
+        // Preload all headline images and icons at the start
+        function preloadImages() {
+            const preloader = document.getElementById('image-preloader');
+            if (!preloader) return;
+
+            // Combine all image sources
+            const headlineImgs = items.map(h => h.image).filter(Boolean);
+            const iconImgs = Object.values(ICONS).flatMap(type => Object.values(type));
+            const allImages = [...new Set([...headlineImgs, ...iconImgs])]; // Use Set to avoid duplicates
+
+            // Clear previous images if any
+            preloader.innerHTML = '';
+
+            // Preload all images by adding them to the off-screen div
+            allImages.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.width = 1;
+                img.height = 1;
+                img.alt = "";
+                img.loading = "eager";
+                preloader.appendChild(img);
+            });
+        }
+        const app = document.getElementById('app');
+        
+
+        const items = [
+            { id: 1, text: "Judge tells Florida not to threaten TV stations over abortion ads | AP ...", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ciaCiV8TCMoa28g", misinfo: false, debunk: "This is a real news headline." },
+            { id: 2, text: "Rural schools feel the pinch from Trump cuts to mental health grants", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cwzRVDtmJs5WDQN", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 3, text: "Lawyers collecting $148 million judgment from Rudy Giuliani say World Series rings must be given up", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_lbdE7DvInFSx0lZ", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 4, text: "Health groups urge RFK Jr. to reinstate injury center staff - Roll Call", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_GyzJaUAIBuwVtHJ", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 5, text: "Veterans group, Democratic lawmakers rally on Capitol Hill to protest VA job cuts", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dweH9mzCdNz1KW0", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 6, text: "Encinitas’s new mayor comes from a midwestern family with a background in small-town politics", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_zDuP6coTabhRqJj", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 7, text: "Anonymous FPPC complaint targets Palomar Health management agreement", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9Sef2TtL1B9QIk0", misinfo: false, debunk: "This is a real news headline." },
+            // { id: 8, text: "Debate over San Diego surveillance tech reignites amid immigration raids, protests and budget cuts", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_SSWqLDGBAOZLMYD", misinfo: false, debunk: "This is a real news headline." },
+            { id: 9, text: "Southern Ocean current reverses for first time, signalling risk of climate system collapse", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_755qOjTPDhBFCrR", misinfo: true, debunk: "The assertion that a Southern Ocean current has reversed for the first time, signaling a climate system collapse and the potential to double atmospheric CO2 concentrations, is not supported by evidence. While a specific, temporary deep ocean current reversal was observed, the scientific study does not conclude that this event indicates a climate system collapse or an imminent doubling of atmospheric CO2, as verified by Snopes." },
+            // { id: 10, text: "***Staff Dumps Elderly Man Out Of Bank… They Turn Pale When Steph Curry Show Up To Take Action!*** – Luxury Blogs", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1lt0KB1aLS4CfpH", misinfo: true, debunk: "The claim that NBA star Steph Curry intervened at a bank to help an elderly man denied access to his account is entirely fabricated. There is no credible evidence or reliable news reports to support this narrative, as confirmed by the fact-checking organization Snopes." },
+            { id: 11, text: "Country Music Stars Blake Shelton and Luke Bryan Join Forces for Historic Texas Flood Relief", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_zr28VKl2tMOULst", misinfo: true, debunk: "There is no credible evidence that country music stars Blake Shelton and Luke Bryan joined forces for flood relief in Kerr County, Texas, in July 2025. This claim is entirely fabricated, as the event described is set in the future, as confirmed by fact-checking organization Snopes." },
+            // { id: 12, text: "Drew Barrymore Comes Out—Fans React To Her Bold Truth", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_J1r8mky75OYq6Ks", misinfo: true, debunk: "The claim that Drew Barrymore has recently come out as bisexual is misleading. While she publicly identified as bisexual, this occurred in 2003, not recently, as confirmed by Snopes. The article itself uses future publication dates (e.g., August 20, 2025), falsely implying the event's recency." },
+            // { id: 13, text: "Donald Trump Just Hung A Painting Of Himself Where Hillary Clinton's Portrait Used To Be And It's Exactly What You'd Expect", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_JiyqTduzB9MMW13", misinfo: true, debunk: "The claim that Donald Trump replaced Hillary Clinton's portrait with his own painting is false. There is no credible evidence for this, and fact-checking organization Snopes confirms the circulating image was a photoshopped meme that originated as a joke on social media.." },
+            // { id: 14, text: "Johnny Depp and Keanu Reeves Refused Entry at a Country Club—Two Seconds Later, the Club Was Bought by Them!", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_JZSYLJjcT6FJfkX", misinfo: true, debunk: "There is no credible evidence to support the claim that Johnny Depp and Keanu Reeves were denied entry to a country club and subsequently purchased it. Reputable fact-checking organization Snopes confirms this story is entirely fabricated, with no legitimate sources supporting the incident." },
+            // { id: 15, text: "Travis Kelce bought the tiny diner that let him eat on credit in college — but what he turned it into now feeds 120 homeless people every day…", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_Y4wVCoI7zeNgWme", misinfo: true, debunk: "There is no credible evidence that Travis Kelce bought a diner from his college days and transformed it into Elena's Kitchen to feed 120 homeless people daily. Reputable news organizations and sources that cover Kelce have not reported this story, and the fact-checking website Snopes found no evidence to support the claim, identifying its origin as a website known for publishing fabricated content." },
+            // { id: 16, text: "Strict 'touch laws' in 31 states, including New York, enforce fines up to $450 for holding electronic devices", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_55gOdgeT2NK8Vaf", misinfo: true, debunk: "The claim that a new, widespread 'touch law' is set to take effect on June 5 across 31 U.S. states, imposing instant fines for holding electronic devices, lacks credible evidence. Fact-checking by Snopes indicates the article mischaracterizes existing state laws against handheld device use as a new and universally implemented 'touch law' taking effect on a specific date, rather than reporting on new legislation." }
+        ];
+
+        let falseHeadlines = [];
+        let trueHeadlines = [];
+
+        preloadImages();
+
+        let allHeadlines = [];
+        let headlineAdviceRatings = [];
+
+        function setupHeadlines() {
+             trueHeadlines = items.filter(item => !item.misinfo).map(item => ({
+                img: item.image,
+                isTrue: true,
+                text: item.text,
+                debunk: item.debunk
+            }));
+
+            falseHeadlines = items.filter(item => item.misinfo).map(item => ({
+                img: item.image,
+                isTrue: false,
+                text: item.text,
+                debunk: item.debunk
+            }));
+
+            allHeadlines = [...trueHeadlines, ...falseHeadlines];
+
+            for (let i = allHeadlines.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allHeadlines[i], allHeadlines[j]] = [allHeadlines[j], allHeadlines[i]];
+            }
+             // Pre-generate and store the advice ratings for each headline
+            headlineAdviceRatings = allHeadlines.map(headline => {
+                const isTrue = headline.isTrue;
+                const hybridHuman = generateCrowdRatings(3, isTrue).map(r => ({ type: 'human', rating: r }));
+                const hybridLlm = generateCrowdRatings(3, isTrue).map(r => ({ type: 'robot', rating: r }));
+
+                return {
+                    human: generateCrowdRatings(6, isTrue),
+                    llm: generateCrowdRatings(6, isTrue),
+                    hybrid: [...hybridHuman, ...hybridLlm]
+                };
+            });
+            headlines = allHeadlines.map(h => h.text);
+            factCheckerRatings = allHeadlines.map(h => h.isTrue ? 'TRUE' : 'FALSE');
+        }
+
+        let currentStep = 0;
+        let currentHeadlineIndex = 0;
+        let currentQuestionInLoop = 0; // 0: veracity, 1: confidence, 2: sharing, 3: familiarity
+        let surveyData = { answers: {} };
+
+        const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'];
+        let userCondition = '';
+        let selfSelectChoice = ''; 
+
+        function assignCondition() {
+            const randomIndex = Math.floor(Math.random() * CONDITIONS.length);
+            userCondition = CONDITIONS[randomIndex];
+            surveyData.condition = userCondition;
+        }
+
+        const coAuthorNotes = {
+            'media_usage': "You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.",
+            'ai_tools_screener': 'Press "Yes" to reveal follow-up questions.',
+            'ai_factcheck_combined': 'Press "Yes" to reveal follow-up questions.'
+        };
+
+        const surveySteps = [
+            // PART 1: WELCOME & INTRO
+            {
+                id: 'instructions',
+                getHTML: () => {
+                    return `
+                        <h1 class="question-title">Instructions</h1>
+                        <div class="text-gray-700 space-y-4">
+                            <p><strong>Welcome, and thank you for taking part!</strong></p>
+                            <p>This study is about how people interact with news and information in today's digital world. It has two parts:</p>
+                            <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
+                                <li class="mb-2">First, we will ask some general questions about your media habits and your views on different information sources.</li>
+                                <li>Second, you will be presented with a series of news headlines and asked to evaluate them.</li>
+                            </ol>
+                            <p class="text-sm text-gray-500 mt-4">Note that the study contains attention checks.</p>
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },       
+            // PART 2: YOUR MEDIA HABITS & VIEWS
+            {
+                id: 'pre_task_transition',
+                html: `
+                    <div class="text-left">
+                        <h1 class="text-2xl font-bold mb-4">Your Media Habits and Views</h1>
+                        <p class="text-gray-600 mb-6">We'd like to first ask a few general questions about how you interact with news and your views on different information sources.</p>
+                        <div class="flex justify-end mt-8">
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'media_usage',
+                html: `
+                    <h1 class="question-title">Media Usage</h1>
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you use social media?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="social_frequency" value="${o}" id="sf_${i}" class="hidden"><label for="sf_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium mb-3 text-center">Which social media platforms do you use? (Select all that apply)</p>
+                            <div class="option-grid">
+                                ${['Facebook', 'Twitter/X', 'Instagram', 'TikTok', 'Reddit', 'LinkedIn', 'None of the above'].map((o,i) => `<div><input type="checkbox" name="social_platforms" value="${o}" id="sp_${i}" class="hidden" onchange="handleSocialPlatformClick(event)"><label for="sp_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium mb-3 text-center">Which of the following do you consider your primary source of news? (Select up to 3)</p>
+                            <div id="news-sources" class="option-grid">
+                                ${['Major news networks', 'Local TV news', 'Newspapers', 'Social Media', 'News websites or apps'].map((o,i) => `<div><input type="checkbox" name="news_sources" value="${o}" id="ns_${i}" class="hidden" onchange="handleNewsSourceClick(event, ${i})"><label for="ns_${i}" class="option-button news-source-label">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you share news on social media?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="share_news_frequency" value="${o}" id="snf_${i}" class="hidden"><label for="snf_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">In the past month, how often did you reference fact-checking websites to check whether a headline you read is true?</p>
+                            <div class="option-grid">
+                                ${['Never', 'About once a week', 'A few times a week', 'A few times a day', 'At least once a day'].map((o,i) => `<div><input type="radio" name="factcheck_freq" value="${o}" id="factcheck_freq_${i}" class="hidden"><label for="factcheck_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            {
+                id: 'instructions 2',
+                getHTML: () => {
+                    return `
+                        <h1 class="question-title">How Do We Know What's True Online?</h1>
+                        <div class="text-gray-700 space-y-4 text-left">
+                            <p>We all see a lot of information online every day, and it can be hard to know what to believe. Here are a few common ways people try to figure out if something is accurate.</p>
+                            <p><b>Expert Fact-Checkers:</b> For a long time, a trusted method has been to rely on professional fact-checkers. These are experts who work for news organizations or social media companies to investigate claims and give a final verdict on whether they are true.</p>
+                            <p><b>Groups:</b> Another approach is to ask a large group of people, think audience polls. You might have seen something similar with "Community Notes" on sites like X (formerly Twitter). The idea is that if you get enough different people to look at something, their collective judgment is often very accurate—sometimes even more so than a single expert.</p>
+                            <p><b>Artificial Intelligence (AI) Chat Bots (<span class="tooltip">?<span class="tooltip-text"><b>What is an AI Chat Bot?</b><br><br>An AI Chat Bot is like a helpful digital assistant you can chat with online. It's a computer program that understands your questions and writes answers that seem like they were written by a human. Popular examples that you might know are ChatGPT and Gemini. Often, when you search on Google or Bing, you might see a special summary at the top called an "AI Overview"—that's also from an AI Chat Bot.</span></span>):</b> The newest way to check information is by using AI Chat Bots. Tools like ChatGPT and Gemini are smart digital assistants that have learned from a huge amount of information online. You can ask them to evaluate information, and they can provide a judgment.</p>
+                            <p>Each of these methods has its own strengths and weaknesses, and none of them are perfect.</p>
+                        </div>
+
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },
+            {
+                id: 'advisorPreference',
+                condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'].includes(c),
+                getHTML: () => {
+                    const options = [
+                        { id: 'pref_humans', value: 'Human-only', text: 'A group of humans' },
+                        { id: 'pref_llms', value: 'LLM-only', text: 'A group of AI chat bots' },
+                        { id: 'pref_hybrid', value: 'Hybrid', text: 'A mix of human and AI chat bots' }
+                    ];
+
+                    // Shuffle the options array (Fisher-Yates shuffle)
+                    for (let i = options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [options[i], options[j]] = [options[j], options[i]];
+                    }
+
+                    const optionsHTML = options.map(opt => `
+                        <div>
+                            <input type="radio" id="${opt.id}" name="advisor_preference" value="${opt.value}" class="hidden">
+                            <label for="${opt.id}" class="option-label">
+                                <b>${opt.text}</b>
+                            </label>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <h1 class="question-title">Your Preference</h1>
+                        <p class="mb-6 font-medium text-center">When evaluating the accuracy of online information, which of the following sources would you most prefer to receive advice from?</p>
+                        <div id="advisor-preference-options" class="space-y-4">
+                            ${optionsHTML}
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="handleAdvisorPreference()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },                            
+            {
+                id: 'trust_questions',
+                html: `
+                    <h1 class="question-title">Trust</h1>
+                    <p class="mb-6 text-center">How often do you think you can trust each of the following groups to do what is right?</p>
+                    <div class="space-y-8">
+                        ${[
+                            { label: 'The government', name: 'trust_gov' },
+                            { label: 'Large corporations', name: 'trust_corp' },
+                            { label: 'Scientists', name: 'trust_sci' },
+                            { label: 'People in general', name: 'trust_ppl' }
+                        ].map(group => `
+                            <div>
+                                <p class="font-medium mb-3 text-center">${group.label}</p>
+                                <div class="option-grid">
+                                    ${[
+                                        'Never',
+                                        'Some of<br>the time',
+                                        'About half<br>the time',
+                                        'Most of<br>the time',
+                                        'Always'
+                                    ].map((option, i) => `
+                                        <div>
+                                            <input type="radio" name="${group.name}" value="${option.replace('<br>', ' ')}" id="${group.name}_${i}" class="hidden">
+                                            <label for="${group.name}_${i}" class="option-button">${option}</label>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
+            {
+                id: 'politics',
+                html: `
+                    <h1 class="question-title">Political Views</h1>
+                    <div class="space-y-8">
+                         <div>
+                            <p class="font-medium mb-3 text-center">If a general election were held today, which political party would you vote for?</p>
+                            <input type="text" name="vote" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Please specify your preferred party or write 'Would not vote'">
+                        </div>
+                        <div>
+                            <p class="font-medium mb-3 text-center">In politics, people sometimes talk of 'left' and 'right'. Where would you place yourself on this scale?</p>
+                            <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
+                                <output for="political_scale_slider" id="slider_value_display" class="mb-2">Value: 6</output>
+                                <input type="range" name="political_scale" id="political_scale_slider" min="0" max="11" step="1" value="6" oninput="document.getElementById('slider_value_display').textContent = 'Value: ' + this.value" class="w-full">
+                                <div class="flex justify-between w-full text-sm text-gray-600 mt-2">
+                                    <span>Left (1)</span>
+                                    <span>Right (12)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            {
+                id: 'ai_tools_screener',
+                html: `
+                    <h1 class="question-title">AI Tools Usage</h1>
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">Have you used AI chat bots tools such as ChatGPT or Gemini before?</p>
+                            <div class="option-grid">
+                                <div><input type="radio" name="ai_used" value="Yes" id="ai_used_yes" class="hidden" onchange="document.getElementById('ai-usage-frequency').classList.remove('hidden')"><label for="ai_used_yes" class="option-button">Yes</label></div>
+                                <div><input type="radio" name="ai_used" value="No" id="ai_used_no" class="hidden" onchange="document.getElementById('ai-usage-frequency').classList.add('hidden')"><label for="ai_used_no" class="option-button">No</label></div>
+                            </div>
+                        </div>
+                        <div id="ai-usage-frequency" class="hidden">
+                            <p class="font-medium mb-3 text-center">In the past 30 days, how often have you used AI chat bots such as ChatGPT or Gemini?</p>
+                            <div class="option-grid">
+                                ${['About once', 'A couple of times', 'Several times', 'A few times every week', 'At least once every day'].map((o,i) => `<div><input type="radio" name="ai_usage_freq" value="${o}" id="ai_usage_freq_${i}" class="hidden"><label for="ai_usage_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            {
+                id: 'ai_factcheck_combined',
+                html: `
+                    <h1 class="question-title">AI for Fact-Checking</h1>
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">Have you ever used AI chat bots such as ChatGPT or Gemini to fact-check news reports before?</p>
+                            <div class="option-grid">
+                                <div><input type="radio" name="ai_factcheck" value="Yes" id="ai_factcheck_yes" class="hidden" onchange="document.getElementById('factcheck-followup').classList.remove('hidden')"><label for="ai_factcheck_yes" class="option-button">Yes</label></div>
+                                <div><input type="radio" name="ai_factcheck" value="No" id="ai_factcheck_no" class="hidden" onchange="document.getElementById('factcheck-followup').classList.add('hidden')"><label for="ai_factcheck_no" class="option-button">No</label></div>
+                            </div>
+                        </div>
+                        <div id="factcheck-followup" class="hidden space-y-8">
+                            <h2 class="font-semibold text-lg text-center pt-4 border-t">Your Experience with AI Fact-Checking</h2>
+                            <div>
+                                <p class="font-medium mb-3 text-center">To what extent do you agree with the following statements?</p>
+                                ${[
+                                    'AI chat bots performs really well when fact-checking news reports.',
+                                    'AI chat bots outperforms existing fact-checking services.',
+                                    'Fact-checking answers provided by AI chat bots can change my mind.',
+                                    'Fact-checking answers provided by AI chat bots are objective.',
+                                    'Fact-checking answers provided by AI chat bots are trustworthy.',
+                                    'Fact-checking answers provided by AI chat bots are informative.'
+                                ].map((statement, idx) => `
+                                    <div class="mb-6">
+                                        <p class="mb-2">${statement}</p>
+                                        <div class="option-grid">
+                                            ${[ 'Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="ai_chatgpt_fact_${idx}" value="${i+1}" id="ai_chatgpt_fact_${idx}_${i}" class="hidden"><label for="ai_chatgpt_fact_${idx}_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            {
+                id: 'crt',
+                html: `
+                    <h1 class="question-title">A Clever Intelligence Test</h1>
+                    <div class="space-y-6">
+                        <div><label class="block font-medium mb-1">If you're running a race and you pass the person in second place, what place are you in?</label><input type="text" name="crt1" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label class="block font-medium mb-1">A farmer had 15 sheep and all but 8 died. How many are left?</label><input type="text" name="crt2" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label class="block font-medium mb-1">Emily’s father has three daughters. The first two are named April and May. What is the third daughter’s name?</label><input type="text" name="crt3" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label class="block font-medium mb-1">How many cubic feet of dirt are there in a hole that is 3’ deep x 3’ wide x 3’ long?</label><input type="text" name="crt4" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+            // PART 3: THE HEADLINE EVALUATION TASK
+            {
+                id: 'task_transition',
+                html: `
+                    <div class="text-left">
+                        <h1 class="text-2xl font-bold mb-4">Headline Task</h1>
+                        <p class="text-gray-600 mb-6">Now for the main part of the study. You will be presented with a series of news headlines as they would appear on social media and asked to evaluate them.</p>
+                        <p>For each headline, you will be asked to rate the following:</p>
+                        <br>
+                        <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
+                            <li class="mb-2">Is the headline accurate?</li>
+                            <li class="mb-2">How confident are you in your judgment?</li>
+                            <li class="mb-2">How likely would you be to share it?</li>
+                            <li>Have you seen or heard about the headline before?</li>
+                        </ol>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'selfSelectAdvisor',
+                condition: (c) => c === 'Self-select',
+                getHTML: () => {
+                    const options = [
+                        // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
+                        { id: 'ss_humans', value: 'Human-only', text: 'A group of humans', description: 'You will see how six other people judged the headline’s accuracy.' },
+                        { id: 'ss_llms', value: 'LLM-only', text: 'A group of AI chat bots', description: 'You will see how six different AI chat bots (like ChatGPT or Gemini) judged the headline’s accuracy.' },
+                        { id: 'ss_hybrid', value: 'Hybrid', text: 'A hybrid group', description: 'You will see how a mixed group of three humans and three AI chat bots judged the headline’s accuracy.' }
+                    ];
+
+                    // Shuffle the options array (Fisher-Yates shuffle)
+                    for (let i = options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [options[i], options[j]] = [options[j], options[i]];
+                    }
+
+                    const optionsHTML = options.map(opt => `
+                        <div>
+                            <input type="radio" id="${opt.id}" name="self_select" value="${opt.value}" class="hidden">
+                            <label for="${opt.id}" class="option-label">
+                                <b>${opt.text}:</b>
+                                <span class="font-normal block mt-1">${opt.description}</span>
+                            </label>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <h1 class="question-title">A Note On Your Advisor</h1>
+                        <p class="mb-6">For the upcoming headlines, you can choose the advisor you would like to receive advice from. Please read the descriptions and make your selection.</p>
+                        <div id="self-select-options" class="space-y-4">
+                           ${optionsHTML}
+                        </div>
+                        <div id="self-select-error" class="text-red-500 text-sm mt-2 text-center hidden">Please make a selection to continue.</div>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="handleSelfSelectAdvisor()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
+            },
+            {
+                id: 'conditionInfo',
+                condition: (c) => ['Fact-checker', 'Human-only', 'LLM-only', 'Hybrid'].includes(selfSelectChoice || c),
+                getHTML: () => {
+                    const adviceCondition = selfSelectChoice || userCondition;
+                    let info = '';
+                    switch(adviceCondition) {
+                        case 'Fact-checker': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from a <strong>fact-checking organization</strong>. For each headline, you will see its final judgment. An icon presented in <strong>green</strong> will indicate an <strong>accurate</strong> judgment (that the headline comes from a credible source), whereas an icon in <strong>red</strong> will indicate an <strong>inaccurate</strong> judgment (as determined by a fact-checker).</p>`; break;
+                        case 'Human-only': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from <strong>six human raters</strong>. For each headline, you will see how each of the six humans judged its accuracy. An icon presented in <strong>green</strong> will indicate that the headline was judged as <strong>accurate</strong>, whereas an icon in <strong>red</strong> will indicate that the headline was judged as <strong>inaccurate</strong>.</p>`; break;
+                        case 'LLM-only': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from <strong>six different AI chat bots</strong>. For each headline, you will see how each of the six AI chat bots judged its accuracy. An icon presented in <strong>green</strong> will indicate that the headline was judged as <strong>accurate</strong>, whereas an icon in <strong>red</strong> will indicate that the headline was judged as <strong>inaccurate</strong>.</p>`; break;
+                        case 'Hybrid': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from a group of <strong>three humans and three AI chat bots</strong>. For each headline, you will see how all six advisors judged its accuracy. An icon presented in <strong>green</strong> will indicate that the headline was judged as <strong>accurate</strong>, whereas an icon in <strong>red</strong> will indicate that the headline was judged as <strong>inaccurate</strong>.</p>`; break;
+                    }
+                    const exampleHTML = getAdviceExampleHTML(adviceCondition);
+                    return `
+                        <div>
+                            <h1 class="question-title">A Note On Your Advisor</h1>
+                            <div class="text-gray-700 space-y-4 my-8">
+                                ${info}
+                                ${exampleHTML}
+                                <p class="text-gray-600 mt-6">This advice will be displayed below each headline to help you make your judgment.</p>
+                            </div>
+                            <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                        </div>
+                    `;
+                }
+            },            
+            // PART 3: HEADLINE TASK
+            {
+                id: 'headlineLoop' // This step's content is generated by renderHeadlineStep()
+            },            
+            // PART 4: POST-TASK FOLLOW-UP
+            {
+                id: 'transition',
+                html: `
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold mb-4">Great Work!</h1>
+                        <p class="text-gray-600 mb-6">You've rated all the headlines. Now, we have just a few final questions. Please remember that all your responses will be treated anonymously.</p>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
+            {
+                id: 'postStudy',
+                condition: () => (selfSelectChoice || userCondition) !== 'Control',
+                html: `
+                    <h1 class="question-title">Questions on Advice</h1>
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">How helpful did you find the advice you receive while rating the headlines?</p>
+                            <div class="option-grid">
+                            ${['Not at all<br>helpful', 'Slightly<br>helpful', 'Moderately<br>helpful', 'Very<br>helpful', 'Extremely<br>helpful'].map((o, i) => `<div><input type="radio" name="helpfulness" value="${o.replace('<br>', ' ')}" id="help_${i}" class="hidden"><label for="help_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium mb-3 text-center">How much did you trust the advice you receive?</p>
+                            <div class="option-grid">
+                             ${['Did not trust<br>it at all', 'Slightly<br>trusted it', 'Moderately<br>trusted it', 'Mostly<br>trusted it', 'Completely<br>trusted it'].map((o, i) => `<div><input type="radio" name="trust" value="${o.replace('<br>', ' ')}" id="trust_${i}" class="hidden"><label for="trust_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                         <div>
+                            <p class="font-medium mb-3 text-center">To what extent did the advice you receive influence your own accuracy ratings?</p>
+                            <div class="option-grid">
+                             ${['Did not influence<br>me at all', 'Slightly<br>influenced me', 'Moderately<br>influenced me', 'Heavily<br>influenced me', 'Completely determined<br>my rating'].map((o, i) => `<div><input type="radio" name="influence" value="${o.replace('<br>', ' ')}" id="inf_${i}" class="hidden"><label for="inf_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                     <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },            
+            // PART 4: DEBUNKING & DEBRIEF
+            {
+                id: 'debunking',
+                condition: () => allHeadlines.some(h => !h.isTrue), // Only show if there were false headlines
+                getHTML: () => `
+                    <h1 class="text-2xl font-bold text-center mb-2">Fact-Check</h1>
+                        <p class="text-center mb-4">Wrapping up!</p>
+                        <p class="text-center mb-6">This study aims to understand how different types of advice affect people's ability to judge the accuracy of news headlines. Some of the headlines you saw were false. Fact-check for these headlines are presented below.</p>
+                    <div id="debunkDisplay" class="flex flex-col items-center space-y-4 bg-red-50 border-2 border-red-200 p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold text-red-700 mb-4">THIS HEADLINE IS FALSE.</h3>
+                        <img id="debunkImage" src="" alt="Debunked headline image" class="max-h-64 rounded-lg shadow" />
+                        <div id="debunkExplanation" class="text-md text-gray-700 text-center pt-4"></div>
+                    </div>
+                    <div class="flex justify-center items-center mt-8 w-full max-w-md mx-auto">
+                        <button id="debunkNav" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
+            // {
+            //     id: 'debriefing',
+            //     getHTML: () => {
+            //         return `
+            //             <h1 class="text-2xl font-bold text-center mb-4">Survey Complete!</h1>
+            //             <p class="text-center mb-4">Thank you for your participation!</p>
+            //             <p class="text-center mb-6">This study aims to understand how different types of advice affect people's ability to judge the accuracy of news headlines. Some of the headlines you saw were false. Your contribution is valuable to our research.</p>
+            //             <div class="text-center text-sm text-gray-500 mt-8">You may now close this window.</div>
+            //         `;
+            //     }
+            // },
+        ];
+        
+        /**
+         * Generates an array of ratings for a crowd.
+         * @param {number} count The number of raters in the crowd.
+         * @param {boolean} isTrueHeadline The actual veracity of the headline.
+         * @returns {boolean[]} An array of true/false ratings.
+         */
+        function generateCrowdRatings(count, isTrueHeadline) {
+            const ratings = [];
+            const crowdAccuracy = 0.83; // Approx. 5 out of 6 are correct
+            for (let i = 0; i < count; i++) {
+                const isRaterCorrect = Math.random() < crowdAccuracy;
+                ratings.push(isRaterCorrect ? isTrueHeadline : !isTrueHeadline);
+            }
+            return ratings.sort(() => Math.random() - 0.5); // Shuffle for randomness
+        }
+
+        function getAdviceExampleHTML(condition) {
+            let exampleTitle = '';
+            let exampleIconsHTML = '';
+            let exampleText = '';
+
+            switch(condition) {
+                case 'Fact-checker':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                    exampleText = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
+                    exampleIconsHTML = `<img src="${ICONS.human.green}" alt="Fact-check rating" class="advice-icon">`;
+                    break;
+                case 'Human-only':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                     exampleText = `4 out of 6 human raters judged the headline as <strong>Accurate</strong>.`;
+                    exampleIconsHTML = [...Array(4)].map(() => `<img src="${ICONS.human.green}" class="advice-icon">`).join('') +
+                                       [...Array(2)].map(() => `<img src="${ICONS.human.red}" class="advice-icon">`).join('');
+                    break;
+                case 'LLM-only':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                    exampleText = `5 out of 6 AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                    exampleIconsHTML = [...Array(5)].map(() => `<img src="${ICONS.robot.green}" class="advice-icon">`).join('') +
+                                       `<img src="${ICONS.robot.red}" class="advice-icon">`;
+                    break;
+                case 'Hybrid':
+                    exampleTitle = `Here is an example of what the advice will look like:`;
+                    exampleText = `5 out of 6 advisors judged the headline as <strong>Accurate</strong>.`;
+                    exampleIconsHTML = `<img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.red}" class="advice-icon">` +
+                                       `<img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon">`;
+                    break;
+            }
+
+            if (exampleTitle) {
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 mt-4 text-center">
+                        <p class="mb-2 text-sm">${exampleTitle}</p>
+                        <div class="text-xs mb-2">${exampleText}</div>
+                        <div class="icon-container" style="transform: scale(0.9); justify-content: center;">
+                            ${exampleIconsHTML}
+                        </div>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function getAdviceHTML(headlineIndex) {
+            const condition = selfSelectChoice || userCondition;
+            if (condition === 'Control') return '';
+
+            const isTrueHeadline = allHeadlines[headlineIndex].isTrue;
+            const ratings = headlineAdviceRatings[headlineIndex]; // Get pre-generated ratings
+            let adviceTitle = '';
+            let iconsHTML = '';
+
+            switch (condition) {
+                case 'Fact-checker':
+                    if (isTrueHeadline) {
+                        adviceTitle = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
+                    } else {
+                        adviceTitle = `This headline is from a non-credible news source and is rated as <strong>inaccurate</strong> by a fact-checker.`;
+                    }
+                    const iconSrc = isTrueHeadline ? ICONS.human.green : ICONS.human.red;
+                    iconsHTML = `<img src="${iconSrc}" alt="Fact-check rating" class="advice-icon">`;
+                    break;
+                
+                case 'Human-only':
+                    const humanRatings = ratings.human; // Use stored ratings
+                    const humanAccurateCount = humanRatings.filter(r => r).length;
+                    adviceTitle = `${humanAccurateCount} out of 6 human rated the headline as <strong>Accurate</strong>.`;
+                    iconsHTML = [...humanRatings].sort((a, b) => b - a).map(rating => 
+                        `<img src="${rating ? ICONS.human.green : ICONS.human.red}" alt="Human rating" class="advice-icon">`
+                    ).join('');
+                    break;
+
+                case 'LLM-only':
+                    const llmRatings = ratings.llm; // Use stored ratings
+                    const llmAccurateCount = llmRatings.filter(r => r).length;
+                    adviceTitle = `${llmAccurateCount} out of 6 AI chat bots rated the headline as <strong>Accurate</strong>.`;
+                    iconsHTML = [...llmRatings].sort((a, b) => b - a).map(rating => 
+                        `<img src="${rating ? ICONS.robot.green : ICONS.robot.red}" alt="AI rating" class="advice-icon">`
+                    ).join('');
+                    break;
+
+                case 'Hybrid':
+                    const hybridRatings = ratings.hybrid; 
+                    const hybridAccurateCount = hybridRatings.filter(r => r.rating).length;
+                    adviceTitle = `${hybridAccurateCount} out of 6 human and AI chat bots rated the headline as <strong>Accurate</strong>.`;
+                    iconsHTML = [...hybridRatings].sort((a, b) => {
+                        // Primary sort: by type (human then robot)
+                        if (a.type !== b.type) {
+                            return a.type === 'human' ? -1 : 1;
+                        }
+                        // Secondary sort: by rating (green then red)
+                        return b.rating - a.rating; // true (1) comes before false (0)
+                    }).map(item => {
+                        const iconSet = ICONS[item.type];
+                        const iconSrc = item.rating ? iconSet.green : iconSet.red;
+                        return `<img src="${iconSrc}" alt="${item.type} rating" class="advice-icon">`;
+                    }).join('');
+                    break;
+            }
+            
+            return `
+                <div class="advice-card">
+                    <p class="mb-2">${adviceTitle}</p>
+                        <div class="icon-container">
+                        ${iconsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function renderHeadlineStep() {
+            const totalQuestions = allHeadlines.length * 4; // Now 4 questions per headline
+            const questionsCompleted = currentHeadlineIndex * 4 + currentQuestionInLoop;
+            const progress = (questionsCompleted / totalQuestions) * 100;
+            
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('progress-text').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').innerText = `Headline ${currentHeadlineIndex + 1} of ${allHeadlines.length}`;
+            
+            const headlineObj = allHeadlines[currentHeadlineIndex];
+            const adviceHTML = getAdviceHTML(currentHeadlineIndex);
+
+            let headlineStimulusHTML = '';
+            if (headlineObj.img) {
+                 headlineStimulusHTML = `
+                    <div class="mb-4 flex flex-col items-center justify-center">
+                        <img src="${headlineObj.img}" alt="News Stimulus" class="max-w-full max-h-96 rounded shadow-md" />
+                    </div>
+                `;
+            } else if (headlineObj.text) {
+                headlineStimulusHTML = `
+                     <div class="headline-card p-4 mb-4">
+                        <p class="text-lg font-semibold text-center">${headlineObj.text}</p>
+                    </div>
+                `;
+            }
+
+            let questionHTML = '';
+
+            switch(currentQuestionInLoop) {
+                case 0: // Veracity
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <div class="option-grid">
+                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
+                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
+                            </div>
+                        </div>`;
+                    break;
+                case 1: // Confidence
+                    const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
+                    const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                            <div class="option-grid">
+                            ${['Not at all<br>confident', 'Somewhat<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+                case 2: // Sharing Intent
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">If you were to see the above headline on social media, how likely would you be to share it?</p>
+                            <div class="option-grid">
+                            ${['Very<br>unlikely', 'Moderately<br>unlikely', 'Slightly<br>unlikely', 'Slightly<br>likely', 'Moderately<br>likely', 'Very<br>likely'].map((o,i)=>`<div><input type="radio" name="sharing" value="${o.replace('<br>',' ')}" id="share_${i}" class="hidden"><label for="share_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 3: // Familiarity
+                     questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
+                            <div class="option-grid">
+                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+            }
+
+            app.innerHTML = `
+                ${headlineStimulusHTML}
+                ${adviceHTML}
+                <div class="space-y-8 mt-8">${questionHTML}</div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="${(currentHeadlineIndex === 0 && currentQuestionInLoop === 0) ? 'prevStep()' : 'prevHeadline()'}" class="btn btn-secondary">Back</button>
+                    <button onclick="nextHeadline()" class="btn btn-primary">Next</button>
+                </div>
+            `;
+
+            // Auto-proceed to next question when an answer is selected
+            const radios = app.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    setTimeout(() => {
+                        nextHeadline();
+                    }, 150); // slight delay for UI feedback
+                });
+            });
+        }
+        
+        let debunkableHeadlines = [];
+        let currentDebunkIndex = 0;
+
+        function renderDebunkStep() {
+            debunkableHeadlines = allHeadlines.filter(h => !h.isTrue);
+            currentDebunkIndex = 0;
+            
+            app.innerHTML = surveySteps.find(s => s.id === 'debunking').getHTML();
+
+            document.getElementById('debunkNav').addEventListener('click', handleDebunkNav);
+            
+            showDebunkItem();
+        }
+
+        function showDebunkItem() {
+            if (debunkableHeadlines.length === 0) return;
+
+            const item = debunkableHeadlines[currentDebunkIndex];
+            
+            const imgEl = document.getElementById('debunkImage');
+            const explanationEl = document.getElementById('debunkExplanation');
+            const navBtn = document.getElementById('debunkNav');
+
+            imgEl.src = item.img;
+            explanationEl.innerHTML = item.debunk;
+
+            const isLastItem = currentDebunkIndex === debunkableHeadlines.length - 1;
+            if (isLastItem) {
+                navBtn.textContent = 'End of Study';
+            } else {
+                navBtn.textContent = 'Next';
+            }
+        }
+
+        function nextDebunk() {
+            if (currentDebunkIndex < debunkableHeadlines.length - 1) {
+                currentDebunkIndex++;
+                showDebunkItem();
+            }
+        }
+
+        function handleDebunkNav() {
+            const isLastItem = currentDebunkIndex === debunkableHeadlines.length - 1;
+            if (isLastItem) {
+                resetSurvey(); 
+            } else {
+                nextDebunk();
+            }
+        }
+
+        function resetSurvey() {
+            // Reset all state variables
+            currentStep = 0;
+            currentHeadlineIndex = 0;
+            currentQuestionInLoop = 0;
+            userCondition = '';
+            selfSelectChoice = '';
+            surveyData = { answers: {} };
+            newsSourceOrder = [];
+
+            // Reset UI elements
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('progress-text').classList.add('hidden');
+            const noteContainer = document.getElementById('co-author-note-container');
+            if (noteContainer) noteContainer.classList.add('hidden');
+            app.innerHTML = `<p class="text-center text-gray-500">Please select a condition from the test menu above to begin the survey.</p>`;
+        }
+
+
+        function renderStep() {
+            const stepData = surveySteps[currentStep];
+            if (!stepData) return;
+
+             // Show/hide the co-author note
+            const noteContainer = document.getElementById('co-author-note-container');
+            if (noteContainer) {
+                const noteText = coAuthorNotes[stepData.id];
+                if (noteText) {
+                    noteContainer.querySelector('p').innerHTML = `<span class="font-bold">Co-author note:</span> ${noteText}`;
+                    noteContainer.classList.remove('hidden');
+                } else {
+                    noteContainer.classList.add('hidden');
+                }
+            }
+
+            if (stepData.condition) {
+                const conditionMet = typeof stepData.condition === 'function' ? stepData.condition(userCondition) : stepData.condition === userCondition;
+                if (!conditionMet) {
+                    currentStep++;
+                    renderStep();
+                    return;
+                }
+            }
+
+            if (stepData.id === 'headlineLoop') {
+                renderHeadlineStep();
+                return;
+            }
+
+            if (stepData.id === 'debunking') {
+                renderDebunkStep();
+                return;
+            }
+            
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('progress-text').classList.add('hidden');
+
+            let content = stepData.html || stepData.getHTML();
+            app.innerHTML = content;
+
+            // Add event listeners for dynamic content
+        }
+        
+        function handleAdvisorPreference() {
+            const selected = document.querySelector('input[name="advisor_preference"]:checked');
+            if (selected) {
+                surveyData.advisorPreference = selected.value;
+            } else {
+                surveyData.advisorPreference = 'Not answered';
+            }
+            nextStep();
+        }
+
+        function handleSelfSelectAdvisor() {
+            const selected = document.querySelector('input[name="self_select"]:checked');
+            const errorDiv = document.getElementById('self-select-error');
+            if (selected) {
+                errorDiv.classList.add('hidden');
+                // This is where we set the choice for the rest of the survey
+                selfSelectChoice = selected.value;
+                surveyData.selfSelectChoice = selfSelectChoice;
+                // Since this is their only choice, it's also their preference
+                surveyData.advisorPreference = selfSelectChoice;
+                nextStep();
+            } else {
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function saveData(stepId) {
+             const inputs = app.querySelectorAll('input:checked, input[type="text"], input[type="number"]');
+             if (stepId.startsWith('headlineLoop')) {
+                 if (inputs.length > 0) {
+                    const input = inputs[0];
+                    if (!surveyData.answers[currentHeadlineIndex]) {
+                        surveyData.answers[currentHeadlineIndex] = {};
+                    }
+                    surveyData.answers[currentHeadlineIndex][input.name] = input.value;
+                 }
+             } else {
+                 surveyData[stepId] = {};
+                 inputs.forEach(input => {
+                     if (input.type === 'checkbox') {
+                         if (!surveyData[stepId][input.name]) {
+                             surveyData[stepId][input.name] = [];
+                         }
+                         surveyData[stepId][input.name].push(input.value);
+                     } else {
+                        surveyData[stepId][input.name] = input.value;
+                     }
+                 });
+             }
+        }
+        
+        function nextHeadline() {
+            saveData(`headlineLoop-q${currentQuestionInLoop}`);
+            currentQuestionInLoop++;
+            if (currentQuestionInLoop >= 4) {
+                currentHeadlineIndex++;
+                currentQuestionInLoop = 0;
+            }
+            if (currentHeadlineIndex >= allHeadlines.length) {
+                currentStep++;
+                renderStep();
+            } else {
+                renderHeadlineStep();
+            }
+        }
+        
+        function nextStep() {
+            const stepData = surveySteps[currentStep];
+            if (!stepData) return;
+
+            // Save data for the current step
+            saveData(stepData.id);
+
+            currentStep++;
+            renderStep();
+        }
+
+        function prevHeadline() {
+            currentQuestionInLoop--;
+            if (currentQuestionInLoop < 0) {
+                if (currentHeadlineIndex > 0) {
+                    currentHeadlineIndex--;
+                    currentQuestionInLoop = 3; // Go to the last question of the previous headline
+                } else {
+                    currentQuestionInLoop = 0; // Stay on the first question of the first headline
+                }
+            }
+            renderHeadlineStep();
+        }
+
+
+        function prevStep() {
+            let targetStep = currentStep - 1;
+
+            while (targetStep >= 0) {
+                const stepData = surveySteps[targetStep];
+                let conditionMet = true;
+                if (stepData.condition) {
+                    // Check if the condition for the target step is met
+                    conditionMet = typeof stepData.condition === 'function' 
+                        ? stepData.condition(userCondition) 
+                        : stepData.condition === userCondition;
+                }
+
+                if (conditionMet) {
+                    // If the step is valid, update currentStep and render it
+                    currentStep = targetStep;
+
+                    // Special handling if we're moving back to the headline loop
+                    if (stepData.id === 'headlineLoop') {
+                        currentHeadlineIndex = allHeadlines.length - 1;
+                        currentQuestionInLoop = 3; 
+                    }
+                    
+                    renderStep();
+                    return; // Exit after rendering the valid step
+                }
+
+                // If condition not met, check the step before it
+                targetStep--;
+            }
+        }
+
+        function startCondition(condition) {
+            userCondition = condition;
+            surveyData.condition = condition;
+            setupHeadlines();
+
+            // Reset survey data
+            currentStep = 0;
+            currentHeadlineIndex = 0;
+            currentQuestionInLoop = 0;
+            selfSelectChoice = '';
+            surveyData = { answers: {} };
+            newsSourceOrder = []; // Reset this too
+
+            renderStep();
+        }
+
+        // Enhanced: Track order of news source selection and show (1), (2), (3) on buttons
+        let newsSourceOrder = [];
+        function handleNewsSourceClick(e, idx) {
+            const input = e.target;
+            if (input.checked) {
+                if (newsSourceOrder.length >= 3) {
+                    input.checked = false;
+                    return;
+                }
+                newsSourceOrder.push(idx);
+            } else {
+                newsSourceOrder = newsSourceOrder.filter(i => i !== idx);
+            }
+            updateNewsSourceLabels();
+        }
+
+        function updateNewsSourceLabels() {
+            const labels = document.querySelectorAll('.news-source-label');
+            labels.forEach((label, i) => {
+                const order = newsSourceOrder.indexOf(i);
+                // Remove any previous numbering
+                const baseText = label.textContent.replace(/ \([123]\)$/,'');
+                if (order !== -1) {
+                    label.textContent = `${baseText} (${order+1})`;
+                } else {
+                    label.textContent = baseText;
+                }
+            });
+        }
+
+        function handleSocialPlatformClick(event) {
+            const clickedCheckbox = event.target;
+            const allPlatformCheckboxes = document.querySelectorAll('input[name="social_platforms"]');
+            const noneOfTheAboveCheckbox = Array.from(allPlatformCheckboxes).find(cb => cb.value === 'None of the above');
+
+            if (!noneOfTheAboveCheckbox) return;
+
+            if (clickedCheckbox.value === 'None of the above' && clickedCheckbox.checked) {
+                // If "None of the above" is checked, uncheck all others.
+                allPlatformCheckboxes.forEach(cb => {
+                    if (cb.value !== 'None of the above') {
+                        cb.checked = false;
+                    }
+                });
+            } else if (clickedCheckbox.checked) {
+                // If any other platform is checked, uncheck "None of the above".
+                noneOfTheAboveCheckbox.checked = false;
+            }
+        }
+
+        // Add event listeners for the test menu
+        document.querySelectorAll('#test-menu .btn-test').forEach(button => {
+            button.addEventListener('click', () => {
+                const condition = button.dataset.condition;
+                if (condition) {
+                    startCondition(condition);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
