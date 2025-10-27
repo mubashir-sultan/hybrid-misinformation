@@ -574,7 +574,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">I think one can trust most news most of the time</p>
                             <div class="option-grid">
-                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
 
@@ -582,7 +582,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">I think I can trust most of the news I consume most of the time</p>
                             <div class="option-grid">
-                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
 
