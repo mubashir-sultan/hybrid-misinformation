@@ -419,7 +419,7 @@
 
         let currentStep = 0;
         let currentHeadlineIndex = 0;
-        let currentQuestionInLoop = 0; // 0: veracity, 1: confidence, 2: sharing, 3: familiarity
+        let currentQuestionInLoop = 0; // 0: veracity, 1: confidence, 2: familiarity
         let surveyData = { answers: {}, got_answers: [] }; // Initialize got_answers array
         let currentPracticeQuestion = 0;
         const practiceHeadline = items_practice[0];
@@ -916,6 +916,7 @@
                         <br>
                         <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
                             <li class="mb-2">Is the headline accurate?</li>
+                            <li>How confident are you in your judgment?</li>
                             <li>Have you seen or heard about the headline before?</li>
                         </ol>
                         <br>
@@ -1297,8 +1298,8 @@
         }
 
         function renderHeadlineStep() {
-            const totalQuestions = allHeadlines.length * 2;
-            const questionsCompleted = currentHeadlineIndex * 2 + currentQuestionInLoop;
+            const totalQuestions = allHeadlines.length * 3; // Changed from 2 to 3
+            const questionsCompleted = currentHeadlineIndex * 3 + currentQuestionInLoop; // Changed from 2 to 3
             const progress = (questionsCompleted / totalQuestions) * 100;
             
             document.getElementById('progress-container').classList.remove('hidden');
@@ -1322,27 +1323,23 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                <div><input type="radio" name="veracity" value="1 - Very inaccurate" id="ver_1" class="hidden"><label for="ver_1" class="option-button">Very<br>inaccurate</label></div>
-                                <div><input type="radio" name="veracity" value="2 - Moderately inaccurate" id="ver_2" class="hidden"><label for="ver_2" class="option-button">Moderately<br>inaccurate</label></div>
-                                <div><input type="radio" name="veracity" value="3 - Slightly inaccurate" id="ver_3" class="hidden"><label for="ver_3" class="option-button">Slightly<br>inaccurate</label></div>
-                                <div><input type="radio" name="veracity" value="4 - Slightly accurate" id="ver_4" class="hidden"><label for="ver_4" class="option-button">Slightly<br>accurate</label></div>
-                                <div><input type="radio" name="veracity" value="5 - Moderately accurate" id="ver_5" class="hidden"><label for="ver_5" class="option-button">Moderately<br>accurate</label></div>
-                                <div><input type="radio" name="veracity" value="6 - Very accurate" id="ver_6" class="hidden"><label for="ver_6" class="option-button">Very<br>accurate</label></div>
+                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
+                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
                             </div>
                         </div>`;
                     break;
-                // case 1: // Confidence
-                //     const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
-                //     const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
-                //     questionHTML = `
-                //         <div>
-                //             <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
-                //             <div class="option-grid">
-                //             ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
-                //             </div>
-                //         </div>`;
-                //     break;
-                case 1: // Familiarity
+                case 1: // Confidence
+                    const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
+                    const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                            <div class="option-grid">
+                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+                case 2: // Familiarity (was case 1)
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1393,27 +1390,23 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                <div><input type="radio" name="veracity" value="1 - Very inaccurate" id="ver_1" class="hidden"><label for="ver_1" class="option-button">Very<br>inaccurate</label></div>
-                                <div><input type="radio" name="veracity" value="2 - Moderately inaccurate" id="ver_2" class="hidden"><label for="ver_2" class="option-button">Moderately<br>inaccurate</label></div>
-                                <div><input type="radio" name="veracity" value="3 - Slightly inaccurate" id="ver_3" class="hidden"><label for="ver_3" class="option-button">Slightly<br>inaccurate</label></div>
-                                <div><input type="radio" name="veracity" value="4 - Slightly accurate" id="ver_4" class="hidden"><label for="ver_4" class="option-button">Slightly<br>accurate</label></div>
-                                <div><input type="radio" name="veracity" value="5 - Moderately accurate" id="ver_5" class="hidden"><label for="ver_5" class="option-button">Moderately<br>accurate</label></div>
-                                <div><input type="radio" name="veracity" value="6 - Very accurate" id="ver_6" class="hidden"><label for="ver_6" class="option-button">Very<br>accurate</label></div>
+                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
+                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
                             </div>
                         </div>`;
                     break;
-                // case 1: // Confidence
-                //     const practiceJudgment = surveyData.practice?.veracity || '';
-                //     const judgmentText = practiceJudgment ? `[Your judgment: "<b>${practiceJudgment}</b>"]` : '';
-                //     questionHTML = `
-                //         <div>
-                //             <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
-                //             <div class="option-grid">
-                //             ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
-                //             </div>
-                //         </div>`;
-                //     break;
-                case 1: // Familiarity
+                case 1: // Confidence
+                    const practiceJudgment = surveyData.practice?.veracity || '';
+                    const judgmentText = practiceJudgment ? `[Your judgment: "<b>${practiceJudgment}</b>"]` : '';
+                    questionHTML = `
+                        <div>
+                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
+                            <div class="option-grid">
+                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            </div>
+                        </div>`;
+                    break;
+                case 2: // Familiarity (was case 1)
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1728,7 +1721,7 @@
                 surveyData.practice[input.name] = input.value;
             }
             currentPracticeQuestion++;
-            if (currentPracticeQuestion >= 2) {
+            if (currentPracticeQuestion >= 3) { // Changed from 2 to 3
                 currentStep++;
                 renderStep();
             } else {
@@ -1748,7 +1741,7 @@
         function nextHeadline() {
             saveData(`headlineLoop-q${currentQuestionInLoop}`);
             currentQuestionInLoop++;
-            if (currentQuestionInLoop >= 2) {
+            if (currentQuestionInLoop >= 3) { // Changed from 2 to 3
                 currentHeadlineIndex++;
                 currentQuestionInLoop = 0;
             }
@@ -1776,7 +1769,7 @@
             if (currentQuestionInLoop < 0) {
                 if (currentHeadlineIndex > 0) {
                     currentHeadlineIndex--;
-                    currentQuestionInLoop = 1; // Go to the last question of the previous headline
+                    currentQuestionInLoop = 2; // Go to the last question of the previous headline (was 1)
                 } else {
                     currentQuestionInLoop = 0; // Stay on the first question of the first headline
                 }
@@ -1805,10 +1798,10 @@
                     // Special handling if we're moving back to the headline loop
                     if (stepData.id === 'headlineLoop') {
                         currentHeadlineIndex = allHeadlines.length - 1;
-                        currentQuestionInLoop = 1; 
+                        currentQuestionInLoop = 2; // (was 1)
                     }
                     if (stepData.id === 'practice_round') {
-                        currentPracticeQuestion = 1;
+                        currentPracticeQuestion = 2; // (was 1)
                     }
                     
                     renderStep();
@@ -1915,6 +1908,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
