@@ -52,9 +52,17 @@
             border-color: #9ca3af;
         }
         input[type="radio"]:checked + .option-label,
-        input[type="checkbox"]:checked + .option-label {
+        input[type="checkbox"]:checked + .option-label,
+        .option-label.selected-rank {
             background-color: #dbeafe;
             border-color: #3b82f6;
+        }
+        .rank-badge {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-weight: 700;
+            color: #1e40af; /* Tailwind blue-800 */
+            font-size: 1.125rem;
         }
         .btn {
             padding: 0.75rem 1.5rem;
@@ -425,6 +433,7 @@
         const practiceHeadline = items_practice[0];
         let currentGOTTrial = 0; // Track current GOT trial index
         let gotStartTime; // To record reaction time
+        let advisorRankings = []; // To store advisor preference ranks
 
         const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'];
         let userCondition = '';
@@ -487,7 +496,6 @@
                         { id: 'pref_llms', value: 'LLM-only', text: 'A group of artificial intelligence (AI) chat bots: Receiving independent advice from several different AI chat bots.' },
                         { id: 'pref_hybrid', value: 'Hybrid', text: 'A mixed group of human and artificial intelligence (AI) chat bots: Receiving independent advice from several different persons and several different AI chat bots.' }
                     ];
-
                     // Shuffle the options array (Fisher-Yates shuffle)
                     for (let i = options.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
@@ -496,22 +504,28 @@
 
                     const optionsHTML = options.map(opt => `
                         <div>
-                            <input type="radio" id="${opt.id}" name="advisor_preference" value="${opt.value}" class="hidden">
-                            <label for="${opt.id}" class="option-label">
+                            <!-- Changed from radio to a div for ranking -->
+                            <div id="${opt.id}" 
+                                 data-value="${opt.value}" 
+                                 class="option-label option-rank-button" 
+                                 onclick="handleAdvisorRank(this, '${opt.value}')">
                                 <b>${opt.text}</b>
-                            </label>
+                            </div>
                         </div>
                     `).join('');
 
                     return `
-
-                        <p class="mb-6 font-medium text-center">When evaluating the accuracy of online information, which of the following sources would you most prefer to receive advice from?</p>
+                        <p class="mb-6 font-medium text-center">When evaluating the accuracy of online information, which of the following sources would you most prefer to receive advice from? Please rank your choices in order of preference.</p>
                         <div id="advisor-preference-options" class="space-y-4">
                             ${optionsHTML}
                         </div>
+                        <div id="advisor-rank-error" class="text-red-500 text-sm mt-4 text-center hidden">Please rank all three options to continue.</div>
                         <div class="flex justify-between mt-8">
                             <button onclick="prevStep()" class="btn btn-secondary">Back</button>
-                            <button onclick="handleAdvisorPreference()" class="btn btn-primary">Next</button>
+                            <div>
+                                <button onclick="resetAdvisorRank()" class="btn btn-secondary mr-2">Reset</button>
+                                <button onclick="handleAdvisorPreferenceNext()" class="btn btn-primary">Next</button>
+                            </div>
                         </div>
                     `;
                 }
@@ -537,17 +551,17 @@
                     const questionsHTML = groups.map(group => `
                         <div>
                             <p class="font-medium mb-3 text-center">${group.label}</p>
-                            <div class="option-grid">
+                            <div class="option-grid" style="grid-template-columns: repeat(11, 1fr); gap: 0.25rem;">
                                 ${[
-                                    'Never',
-                                    'Some of<br>the time',
-                                    'About half<br>the time',
-                                    'Most of<br>the time',
-                                    'Always'
+                                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
                                 ].map((option, i) => `
-                                    <div>
-                                        <input type="radio" name="${group.name}" value="${option.replace('<br>', ' ')}" id="${group.name}_${i}" class="hidden">
-                                        <label for="${group.name}_${i}" class="option-button">${option}</label>
+                                    <div style="min-width: 32px;">
+                                        <input type="radio" name="${group.name}" value="${option}" id="${group.name}_${i}" class="hidden">
+                                        <label for="${group.name}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.75rem;">
+                                            <span class="text-sm font-semibold">${option}</span>
+                                            ${i === 0 ? '<span class="text-xs text-gray-500" style="line-height: 1;">(Not at<br>all)</span>' : ''}
+                                            ${i === 10 ? '<span class="text-xs text-gray-500" style="line-height: 1;">(Completely)</span>' : ''}
+                                        </label>
                                     </div>
                                 `).join('')}
                             </div>
@@ -555,7 +569,7 @@
                     `).join('');
 
                     return `
-                        <p class="mb-6 font-medium text-center">How often do you think you can trust each of the following to do what is right?</p>
+                        <p class="mb-6 font-medium text-center">On a scale of 0–10, where 0 is not at all and 10 is completely, how much do you trust each of the following?</p>
                         <div class="space-y-8">
                            ${questionsHTML}
                         </div>
@@ -916,7 +930,7 @@
                         <br>
                         <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
                             <li class="mb-2">Is the headline accurate?</li>
-                            <li>How confident are you in your judgment?</li>
+                            <li class="mb-2">How confident are you in your judgment?</li>
                             <li>Have you seen or heard about the headline before?</li>
                         </ol>
                         <br>
@@ -1663,6 +1677,59 @@
             // Add event listeners for dynamic content
         }
         
+        function handleAdvisorRank(element, value) {
+            // Only add if it's not already ranked and we haven't ranked 3 items yet
+            if (!advisorRankings.includes(value) && advisorRankings.length < 3) {
+                advisorRankings.push(value);
+                updateAdvisorRankUI();
+            }
+        }
+
+        function updateAdvisorRankUI() {
+            const options = document.querySelectorAll('.option-rank-button');
+            options.forEach(option => {
+                const value = option.dataset.value;
+                const rankIndex = advisorRankings.indexOf(value);
+                
+                // Clear existing rank badge
+                const existingBadge = option.querySelector('.rank-badge');
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+                
+                if (rankIndex !== -1) {
+                    // Item is ranked
+                    option.classList.add('selected-rank');
+                    const badge = document.createElement('span');
+                    badge.className = 'rank-badge';
+                    badge.textContent = `(${rankIndex + 1})`;
+                    option.appendChild(badge);
+                } else {
+                    // Item is not ranked
+                    option.classList.remove('selected-rank');
+                }
+            });
+        }
+
+        function resetAdvisorRank() {
+            advisorRankings = [];
+            updateAdvisorRankUI();
+            const errorDiv = document.getElementById('advisor-rank-error');
+            if (errorDiv) errorDiv.classList.add('hidden');
+        }
+
+        function handleAdvisorPreferenceNext() {
+            const errorDiv = document.getElementById('advisor-rank-error');
+            // Ensure all 3 options are ranked before proceeding
+            if (advisorRankings.length === 3) {
+                surveyData.advisorPreferenceRank = [...advisorRankings]; // Save a copy
+                if (errorDiv) errorDiv.classList.add('hidden');
+                nextStep();
+            } else {
+                if (errorDiv) errorDiv.classList.remove('hidden');
+            }
+        }
+
         function handleAdvisorPreference() {
             const selected = document.querySelector('input[name="advisor_preference"]:checked');
             if (selected) {
@@ -1908,6 +1975,7 @@
     </script>
 </body>
 </html>
+
 
 
 
