@@ -313,8 +313,9 @@
             // Combine all image sources
             const headlineImgs = items.map(h => h.image).filter(Boolean);
             const practiceImgs = items_practice.map(h => h.image).filter(Boolean);
+            const gotImgs = got_items.map(h => h.image).filter(Boolean); // Add GOT images
             const iconImgs = Object.values(ICONS).flatMap(type => Object.values(type));
-            const allImages = [...new Set([...headlineImgs, ...practiceImgs, ...iconImgs])]; // Use Set to avoid duplicates
+            const allImages = [...new Set([...headlineImgs, ...practiceImgs, ...gotImgs, ...iconImgs])]; // Use Set to avoid duplicates
 
             // Clear previous images if any
             preloader.innerHTML = '';
@@ -350,8 +351,21 @@
             // { id: 14, text: "Johnny Depp and Keanu Reeves Refused Entry at a Country Club—Two Seconds Later, the Club Was Bought by Them!", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_JZSYLJjcT6FJfkX", misinfo: true, debunk: "There is no credible evidence to support the claim that Johnny Depp and Keanu Reeves were denied entry to a country club and subsequently purchased it. Reputable fact-checking organization Snopes confirms this story is entirely fabricated, with no legitimate sources supporting the incident." },
             // { id: 15, text: "Travis Kelce bought the tiny diner that let him eat on credit in college — but what he turned it into now feeds 120 homeless people every day…", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_Y4wVCoI7zeNgWme", misinfo: true, debunk: "There is no credible evidence that Travis Kelce bought a diner from his college days and transformed it into Elena's Kitchen to feed 120 homeless people daily. Reputable news organizations and sources that cover Kelce have not reported this story, and the fact-checking website Snopes found no evidence to support the claim, identifying its origin as a website known for publishing fabricated content." },
             // { id: 16, text: "Strict 'touch laws' in 31 states, including New York, enforce fines up to $450 for holding electronic devices", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_55gOdgeT2NK8Vaf", misinfo: true, debunk: "The claim that a new, widespread 'touch law' is set to take effect on June 5 across 31 U.S. states, imposing instant fines for holding electronic devices, lacks credible evidence. Fact-checking by Snopes indicates the article mischaracterizes existing state laws against handheld device use as a new and universally implemented 'touch law' taking effect on a specific date, rather than reporting on new legislation." }
-            { id: 17, text: "Attention check", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_e7vj18Aducmlsj2", misinfo: false, debunk: "This is an attention check" }
+            { id: 17, text: "Attention check", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_e7vj18Aducmlsj2", misinfo: true, debunk: "This is an attention check" }
             
+        ];
+
+        const got_items = [
+            { field1: "Chimpanzee", field2: "Baseball player", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_UteSYpuoJyofP4W" },
+            { field1: "Fire station", field2: "Confectionary", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_vAKydv0JcgsEY4D" },
+            { field1: "Eel", field2: "Tiger shark", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_BShkYxhh1As8B3H" },
+            { field1: "Horse", field2: "Golden retriever", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_mhwf8FQqLjen8EK" },
+            { field1: "Parking meter", field2: "Stop sign", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_auQ0MszsukI3ogf" },
+            { field1: "Barn", field2: "Greenhouse", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ud9B8A93VN1cA6h" },
+            { field1: "Armadillo", field2: "Basketball", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_TS0kpa101GdAVru" },
+            { field1: "Apple", field2: "Robin", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_MfV9KuMYgiGM4mq" },
+            { field1: "Mug", field2: "Bubble", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_fmSEgyR746c5xpL" },
+            { field1: "Centipede", field2: "Crayon", image: "https://cornell.yul1.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2dLv0qCysyUdQ78" }
         ];
 
         const items_practice = [
@@ -405,10 +419,12 @@
 
         let currentStep = 0;
         let currentHeadlineIndex = 0;
-        let currentQuestionInLoop = 0; // 0: veracity, 1: confidence, 2: sharing, 3: familiarity
-        let surveyData = { answers: {} };
+        let currentQuestionInLoop = 0; // 0: veracity, 1: confidence, 2: familiarity
+        let surveyData = { answers: {}, got_answers: [] }; // Initialize got_answers array
         let currentPracticeQuestion = 0;
         const practiceHeadline = items_practice[0];
+        let currentGOTTrial = 0; // Track current GOT trial index
+        let gotStartTime; // To record reaction time
 
         const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'];
         let userCondition = '';
@@ -424,19 +440,31 @@
             'media_usage': "You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.",
             'ai_tools_screener': 'Press "Yes" to reveal follow-up questions.',
             'ai_factcheck_combined': 'Press "Yes" to reveal follow-up questions.',
-            'politics': 'The pointer and value for the slider will be hidden initially to avoid anchoring.'
+            'politics': 'The pointer and value for the slider will be hidden initially to avoid anchoring.',
+            'got_instructions': "The images appear very rapidly (250ms). That's the measure, we can't really do anything about it.",
+            'conditionInfo': "from reading this are you more confused or are things rather clear?"
         };
 
+        // Define platform lists
+        const socialPlatformsList = [
+            'Facebook', 'X (formerly Twitter)', 
+            'Instagram', 'Reddit', 'Snapchat', 
+            'TikTok', 'Twitch', 'Mastodon', 'Threads', 'BlueSky', 
+            'Truth Social', 'Gab', 'Parler', 'Gettr',
+            'Odysee', '4chan'
+        ];
+        const socialPlatformsEnd = ['None of these', 'Other'];
+
+
         const surveySteps = [
-            // PART 1: WELCOME & INTRO
+             // PART 1: WELCOME & INTRO
             {
                 id: 'instructions',
                 getHTML: () => {
                     return `
-                        <h1 class="question-title">Instructions</h1>
                         <div class="text-gray-700 space-y-4">
                             <p><strong>Welcome, and thank you for taking part!</strong></p>
-                            <p>This study is about how people interact with news and information in today's digital world. It has two parts:</p>
+                            <p>This study is about how people interact with news in today's digital world. It has two parts:</p>
                             <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
                                 <li class="mb-2">First, we will ask some general questions.</li>
                                 <li>Second, you will be presented with a series of news headlines and asked to evaluate them.</li>
@@ -450,88 +478,14 @@
                     `;
                 }
             },       
-            // PART 2: YOUR MEDIA HABITS & VIEWS
-            {
-                id: 'media_usage',
-                html: `
-                    <h1 class="question-title">Media Habits</h1>
-                    <p class="text-gray-600 mb-6 text-left">We'd like to first ask a few general questions about how you interact with news and your views on different information sources.</p>
-
-                    <div class="space-y-8 pt-8 border-t">
-                        <div>
-                            <p class="font-medium mb-3 text-center">How often do you use social media?</p>
-                            <div class="option-grid">
-                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="social_frequency" value="${o}" id="sf_${i}" class="hidden"><label for="sf_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        <div>
-                            <p class="font-medium mb-3 text-center">Which of the following do you consider your primary source of news? (Select up to 3)</p>
-                            <div id="news-sources" class="option-grid">
-                                ${['Major news networks', 'Local TV news', 'Newspapers', 'Social Media', 'News websites or apps'].map((o,i) => `<div><input type="checkbox" name="news_sources" value="${o}" id="ns_${i}" class="hidden" onchange="handleNewsSourceClick(event, ${i})"><label for="ns_${i}" class="option-button news-source-label">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        <div>
-                            <p class="font-medium mb-3 text-center">Which, if any, of the following have you used for finding, reading, watching, sharing or discussing news in the last week? Please select all that apply.</p>
-                            <div class="option-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); display: grid; gap: 0.75rem;">
-                                ${[
-                                    'Facebook', 'LinkedIn', 'X (formerly Twitter)', 'YouTube', 
-                                    'Instagram', 'Reddit', 'Viber', 'Snapchat', 'Telegram', 
-                                    'TikTok', 'Nextdoor', 'Twitch', 'Mastodon', 'Threads', 'BlueSky', 
-                                    'Rumble', 'Truth Social', 'Gab', 'Parler', 'Gettr', 'Bitchute',
-                                    'Odysee', '4chan', 'None of these', 'Other'
-                                ].map((o,i) => `<div style="flex: 1 1 120px;"><input type="checkbox" name="social_platforms" value="${o}" id="sp_${i}" class="hidden" onchange="handleSocialPlatformClick(event)"><label for="sp_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                            <div id="social_platforms_other_wrapper" class="hidden mt-4">
-                                <label for="social_platforms_other" class="block font-medium mb-1 text-center">Other (please specify):</label>
-                                <input type="text" id="social_platforms_other" name="social_platforms_other" class="w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                        </div>
-                        <!--
-                        <div>
-                            <p class="font-medium mb-3 text-center">How often do you share news on social media?</p>
-                            <div class="option-grid">
-                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="share_news_frequency" value="${o}" id="snf_${i}" class="hidden"><label for="snf_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        <!--
-                        <div>
-                            <p class="font-medium mb-3 text-center">In the past month, how often did you reference fact-checking websites to check whether a headline you read is true?</p>
-                            <div class="option-grid">
-                                ${['Never', 'About once a week', 'A few times a week', 'A few times a day', 'At least once a day'].map((o,i) => `<div><input type="radio" name="factcheck_freq" value="${o}" id="factcheck_freq_${i}" class="hidden"><label for="factcheck_freq_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                        -->
-                    </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
-            },
-            {
-                id: 'instructions 2',
-                getHTML: () => {
-                    return `
-                        <h1 class="question-title">Information Online?</h1>
-                        <div class="text-gray-700 space-y-4 text-left">
-                            <p>We all see a lot of information online every day. Here are three approaches to help us judge whether some piece of information is accurate.</p>
-                            <p><b>Group of humans:</b> In this approach we check how a group of other people evaluated a piece of information. The idea is that if you get different people to look at something, their collective judgment can often be accurate---sometimes even more accurate than that of most group members or even the best member in that group.</p>
-                            <p><b>Group of Artificial Intelligence (AI) Chat Bots:</b> In this approach we check how a group of AI Chat Bots evaluated a piece of information. The idea is that if you get different AI Chat Bots to look at something, their collective judgment can often be accurate---sometimes even more accurate than that of most group members or even the best member in that group.</p>
-                            <p><b>Hybrid group of humans and Artificial Intelligence (AI) Chat Bots:</b> In this approach we check how a mixed group of human and AI Chat Bots evaluated a piece of information. The idea is that if you get different humans and AI Chat Bots to look at something, their collective judgment can often be accurate---sometimes even more accurate than that of most group members or even the best member in that group.</p>
-                        </div>
-
-                        <div class="flex justify-between mt-8">
-                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
-                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
-                        </div>
-                    `;
-                }
-            },
-            {
+             {
                 id: 'advisorPreference',
                 condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'].includes(c),
                 getHTML: () => {
                     const options = [
-                        { id: 'pref_humans', value: 'Human-only', text: 'Group of humans' },
-                        { id: 'pref_llms', value: 'LLM-only', text: 'Group of Artificial Intelligence (AI) Chat Bots' },
-                        { id: 'pref_hybrid', value: 'Hybrid', text: 'Hybrid group of humans and Artificial Intelligence (AI) Chat Bots' }
+                        { id: 'pref_humans', value: 'Human-only', text: 'A group of humans: Receiving independent advice from several different people.' },
+                        { id: 'pref_llms', value: 'LLM-only', text: 'A group of artificial intelligence (AI) chat bots: Receiving independent advice from several different AI chat bots.' },
+                        { id: 'pref_hybrid', value: 'Hybrid', text: 'A mixed group of human and artificial intelligence (AI) chat bots: Receiving independent advice from several different persons and several different AI chat bots.' }
                     ];
 
                     // Shuffle the options array (Fisher-Yates shuffle)
@@ -550,7 +504,7 @@
                     `).join('');
 
                     return `
-                        <h1 class="question-title">Your Preference</h1>
+
                         <p class="mb-6 font-medium text-center">When evaluating the accuracy of online information, which of the following sources would you most prefer to receive advice from?</p>
                         <div id="advisor-preference-options" class="space-y-4">
                             ${optionsHTML}
@@ -564,53 +518,63 @@
             },                            
             {
                 id: 'trust_questions',
-                html: `
-                    <h1 class="question-title">Trust</h1>
-                    <p class="mb-6 text-center">How often do you think you can trust each of the following groups to do what is right?</p>
-                    <div class="space-y-8">
-                        ${[
-                            { label: 'The government', name: 'trust_gov' },
-                            { label: 'Large corporations', name: 'trust_corp' },
-                            { label: 'Traditional media', name: 'trust_trad_media' },
-                            { label: 'Digital media (e.g., social media)', name: 'trust_new_media' },
-                            { label: 'Scientists', name: 'trust_sci' },
-                            { label: 'People in general', name: 'trust_ppl' }
-                        ].map(group => `
-                            <div>
-                                <p class="font-medium mb-3 text-center">${group.label}</p>
-                                <div class="option-grid">
-                                    ${[
-                                        'Never',
-                                        'Some of<br>the time',
-                                        'About half<br>the time',
-                                        'Most of<br>the time',
-                                        'Always'
-                                    ].map((option, i) => `
-                                        <div>
-                                            <input type="radio" name="${group.name}" value="${option.replace('<br>', ' ')}" id="${group.name}_${i}" class="hidden">
-                                            <label for="${group.name}_${i}" class="option-button">${option}</label>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                getHTML: () => {
+                    const groups = [
+                        { label: 'The National Government', name: 'trust_gov' },
+                        // { label: 'Large corporations', name: 'trust_corp' },
+                        { label: 'News Media (e.g., press, television)', name: 'trust_trad_media' },
+                        { label: 'Social Media (e.g., Facebook, TikTok, X)', name: 'trust_new_media' }
+                        // { label: 'Scientists', name: 'trust_sci' },
+                        // { label: 'People in general', name: 'trust_ppl' }
+                    ];
+
+                    // Shuffle the groups array (Fisher-Yates shuffle)
+                    for (let i = groups.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [groups[i], groups[j]] = [groups[j], groups[i]];
+                    }
+
+                    const questionsHTML = groups.map(group => `
+                        <div>
+                            <p class="font-medium mb-3 text-center">${group.label}</p>
+                            <div class="option-grid">
+                                ${[
+                                    'Never',
+                                    'Some of<br>the time',
+                                    'About half<br>the time',
+                                    'Most of<br>the time',
+                                    'Always'
+                                ].map((option, i) => `
+                                    <div>
+                                        <input type="radio" name="${group.name}" value="${option.replace('<br>', ' ')}" id="${group.name}_${i}" class="hidden">
+                                        <label for="${group.name}_${i}" class="option-button">${option}</label>
+                                    </div>
+                                `).join('')}
                             </div>
-                        `).join('')}
-                    </div>
-                    <div class="flex justify-between mt-8">
-                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
-                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
-                    </div>
-                `
+                        </div>
+                    `).join('');
+
+                    return `
+                        <p class="mb-6 font-medium text-center">How often do you think you can trust each of the following to do what is right?</p>
+                        <div class="space-y-8">
+                           ${questionsHTML}
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                        </div>
+                    `;
+                }
             },
             {
                 id: 'trust_in_news',
                 html: `
-                    <h1 class="question-title">Trust in News</h1>
                     <div class="space-y-8">
                         <!-- Question 1 -->
                         <div>
-                            <p class="font-medium mb-3 text-center">I think you can trust most news most of the time</p>
+                            <p class="font-medium mb-3 text-center">I think one can trust most news most of the time</p>
                             <div class="option-grid">
-                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
 
@@ -618,62 +582,29 @@
                         <div>
                             <p class="font-medium mb-3 text-center">I think I can trust most of the news I consume most of the time</p>
                             <div class="option-grid">
-                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
 
                         <!-- Question 3 -->
                         <div>
-                            <label class="block font-medium mb-3 text-center" for="top_3_news">Please list your top 3 news sources:</label>
-                            <textarea id="top_3_news" name="top_3_news" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top three news sources you trust:</label>
+                            <textarea id="top_3_news_trust" name="top_3_news_trust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
+                        </div>
+
+                        <!-- Question 4 (New) -->
+                        <div>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_distrust">Please list the top three news sources you distrust:</label>
+                            <textarea id="top_3_news_distrust" name="top_3_news_distrust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
                         </div>
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
-            {
-                id: 'misinformation_concerns',
-                html: `
-                    <h1 class="question-title">Views on Online News</h1>
-                    <div class="space-y-8">
-                        <!-- Question 1 -->
-                        <div>
-                            <p class="font-medium mb-3 text-center">"Thinking about online news, I am concerned about what is real and what is fake on the internet."</p>
-                            <div class="option-grid">
-                                ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="misinfo_concern" value="${i+1}" id="misinfo_concern_${i}" class="hidden"><label for="misinfo_concern_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-
-                        <!-- Question 2 -->
-                        <div>
-                            <p class="font-medium mb-3 text-center">Imagine you came across something important in the news online that you suspect may be false, misleading, or fake. If you decided you wanted to check it, where would you usually go? Please select all that apply.</p>
-                            <div class="option-grid">
-                                ${['A news source I trust', 'A fact-checking website', 'Somebody I know and trust personally', 'Social media or video network', 'Search engine', 'An AI chatbot', 'Wikipedia', 'Official source (e.g. government website)', 'Comments from other users', 'Other'].map((o,i) => `<div><input type="checkbox" name="fake_verify" value="${o}" id="fv_${i}" class="hidden" onchange="handleFakeVerifyClick(event)"><label for="fv_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                            <div id="fake_verify_other_wrapper" class="hidden mt-4">
-                                <label for="fake_verify_other" class="block font-medium mb-1 text-center">Other (please specify):</label>
-                                <input type="text" id="fake_verify_other" name="fake_verify_other" class="w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
-            },            
-            {
+           {
                 id: 'politics',
                 html: `
-                    <h1 class="question-title">Political Views</h1>
                     <div class="space-y-8">
-                         <div>
-                            <p class="font-medium mb-3 text-center">How interested, if at all, would you say you are in politics?</p>
-                            <div class="option-grid">
-                                ${['Not at all interested', 'Not very interested', 'Somewhat interested', 'Very interested', 'Extremely interested'].map((o,i) => `<div><input type="radio" name="political_interest" value="${i+1}" id="pol_int_${i}" class="hidden"><label for="pol_int_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                         <div>
-                            <p class="font-medium mb-3 text-center">Assuming that you are eligible to vote, if a general election were held today, which political party would you vote for?</p>
-                            <input type="text" name="vote" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Please specify your preferred party or write 'Would not vote'">
-                        </div>
                         <div>
                             <p class="font-medium mb-3 text-center">In politics, people sometimes talk of 'left' and 'right'. Where would you place yourself on this scale?</p>
                             <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
@@ -688,74 +619,157 @@
                     </div>
                     <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
-            },
+            },            
+            // PART 2: YOUR MEDIA HABITS & VIEWS
             {
-                id: 'religion_importance',
-                html: `
-                    <h1 class="question-title">Religion</h1>
+                id: 'media_usage',
+                getHTML: () => {
+                    // Shuffle the main platforms list
+                    for (let i = socialPlatformsList.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [socialPlatformsList[i], socialPlatformsList[j]] = [socialPlatformsList[j], socialPlatformsList[i]];
+                    }
+                    // Combine shuffled list with the end options
+                    const allPlatforms = [...socialPlatformsList, ...socialPlatformsEnd];
+
+                    return `
                     <div class="space-y-8">
+                        <!-- NEWLY ADDED AI QUESTION -->
                         <div>
-                            <p class="font-medium mb-3 text-center">How important is religion in your life?</p>
+                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
                             <div class="option-grid">
-                                ${['Not important at all', 'A little important', 'Moderately important', 'Very important', 'Extremely important'].map((o,i) => `<div><input type="radio" name="religion_importance" value="${o}" id="relig_imp_${i}" class="hidden"><label for="relig_imp_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
+                        
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you share news on social media?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="share_news_frequency" value="${o}" id="snf_${i}" class="hidden"><label for="snf_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        <!--
+                        <div>
+                            <p class="font-medium mb-3 text-center">In the past month, how often did you reference fact-checking websites to check whether a headline you read is true?</p>
+                            <div class="option-grid">
+                                ${['Never', 'About once a week', 'A few times a week', 'A few times a day', 'At least once a day'].map((o,i) => `<div><input type="radio" name="factcheck_freq" value="${o}" id="factcheck_freq_${i}" class="hidden"><label for="factcheck_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+                }
+            },
+                       // NEW AI USAGE QUESTIONS
+            /* REMOVED this step and merged with 'media_usage'
+            {
+                id: 'ai_usage',
+                html: `
+                    <div class="space-y-8">
+                        <div>
+                            <p class="font-medium mb-3 text-center">How often do you use AI chat bots (like ChatGPT, Gemini, etc.)?</p>
+                            <div class="option-grid">
+                                ${['Never', 'Rarely', 'Once a day', 'Several times a day', 'Almost constantly'].map((o,i) => `<div><input type="radio" name="ai_frequency" value="${o}" id="ai_freq_${i}" class="hidden"><label for="ai_freq_${i}" class="option-button">${o}</label></div>`).join('')}
+                            </div>
+                        </div>
+                        
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
-             {
-                id: 'humility_scale',
-                html: `
-                    <div class="space-y-8">
+            */            
+            // {
+            //     id: 'misinformation_concerns',
+            //     html: `
+            //         <h1 class="question-title">Views on Online News</h1>
+            //         <div class="space-y-8">
+            //             <!-- Question 1 -->
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">"Thinking about online news, I am concerned about what is real and what is fake on the internet."</p>
+            //                 <div class="option-grid">
+            //                     ${['Strongly disagree', 'Tend to disagree', 'Neither agree nor disagree', 'Tend to agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="misinfo_concern" value="${i+1}" id="misinfo_concern_${i}" class="hidden"><label for="misinfo_concern_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+
+            //             <!-- Question 2 -->
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">Imagine you came across something important in the news online that you suspect may be false, misleading, or fake. If you decided you wanted to check it, where would you usually go? Please select all that apply.</p>
+            //                 <div class="option-grid">
+            //                     ${['A news source I trust', 'A fact-checking website', 'Somebody I know and trust personally', 'Social media or video network', 'Search engine', 'An AI chatbot', 'Wikipedia', 'Official source (e.g. government website)', 'Comments from other users', 'Other'].map((o,i) => `<div><input type="checkbox" name="fake_verify" value="${o}" id="fv_${i}" class="hidden" onchange="handleFakeVerifyClick(event)"><label for="fv_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //                 <div id="fake_verify_other_wrapper" class="hidden mt-4">
+            //                     <label for="fake_verify_other" class="block font-medium mb-1 text-center">Other (please specify):</label>
+            //                     <input type="text" id="fake_verify_other" name="fake_verify_other" class="w-full p-2 border border-gray-300 rounded-md">
+            //                 </div>
+            //             </div>
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },            
+             // {
+            //     id: 'religion_importance',
+            //     html: `
+            //         <div class="space-y-8">
+            //             <div>
+            //                 <p class="font-medium mb-3 text-center">How important is religion in your life?</p>
+            //                 <div class="option-grid">
+            //                     ${['Not important at all', 'A little important', 'Moderately important', 'Very important', 'Extremely important'].map((o,i) => `<div><input type="radio" name="religion_importance" value="${o}" id="relig_imp_${i}" class="hidden"><label for="relig_imp_${i}" class="option-button">${o}</label></div>`).join('')}
+            //                 </div>
+            //             </div>
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },
+            //  {
+            //     id: 'humility_scale',
+            //     html: `
+            //         <div class="space-y-8">
+            //             <p class="text-gray-700 text-center">Carefully read each statement and indicate the degree to which you agree each statement is true for you.</p>
                         
-                        ${[
-                            "My ideas are usually better than other people's ideas.",
-                            "For the most part, others have more to learn from me than I have to learn from them.",
-                            "When I am really confident in a belief, there is very little chance that belief is wrong.",
-                            "I'd rather rely on my own knowledge about most topics than turn to others for expertise.",
-                            "On important topics, I am not likely to be swayed by the viewpoints of others.",
-                            "Listening to perspectives of others seldom changes my important opinions."
-                        ].map((statement, idx) => `
-                            <div class="mb-6">
-                                <p class="mb-3 text-center">${statement}</p>
-                                <div class="option-grid">
-                                    ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="humility_${idx+1}" value="${i+1}" id="humility_${idx+1}_${i}" class="hidden"><label for="humility_${idx+1}_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
-            },           
+            //             ${[
+            //                 "My ideas are usually better than other people's ideas.",
+            //                 "For the most part, others have more to learn from me than I have to learn from them.",
+            //                 "When I am really confident in a belief, there is very little chance that belief is wrong.",
+            //                 "I'd rather rely on my own knowledge about most topics than turn to others for expertise.",
+            //                 "On important topics, I am not likely to be swayed by the viewpoints of others.",
+            //                 "Listening to perspectives of others seldom changes my important opinions."
+            //             ].map((statement, idx) => `
+            //                 <div class="mb-6">
+            //                     <p class="mb-3 text-center">${statement}</p>
+            //                     <div class="option-grid">
+            //                         ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="humility_${idx+1}" value="${i+1}" id="humility_${idx+1}_${i}" class="hidden"><label for="humility_${idx+1}_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
+            //                     </div>
+            //                 </div>
+            //             `).join('')}
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },           
 // PART 1: CONFORMITY/ADVICE SCALE
             {
                 id: 'conformity_scale',
                 html: `
                     <div class="space-y-8">
-                        <p class="font-medium text-center">Choose the level of agreement/disagreement you feel for each statement.</p>
+                        <p class="font-medium text-center">Please indicate how much you agree or disagree with each of the following statements.</p>
 
                         ${[
-                            "I often rely on, and act upon, the advice of others.",
-                            "I would like to be the last one to change my opinion in a heated argument on a controversial topic.",
-                            "Generally, I'd rather give in and go along for the sake of peace than struggle to have my way.",
-                            "I tend to follow family tradition in making political decisions.",
-                            "Basically, my friends are the ones who decide what we do together.",
-                            "A charismatic and eloquent speaker can easily influence and change my ideas.",
-                            "I am more independent than conforming in my ways.",
-                            "If someone is very persuasive, I tend to change my opinion and go along with them.",
-                            "I don't give in to others easily.",
-                            "I tend to rely on others when I have to make an important decision quickly.",
-                            "I prefer to make my own way in life rather than find a group I can follow."
+                            "For fear of doing something wrong, I prefer to copy the behaviour of others and do the same as them",
+                            "When I am unsure of my own opinion, I value what others think more highly",
+                            "When carrying out a difficult task, I proceed like the majority for fear of making a mistake",
+                            "In difficult situations, I behave like the majority, because other people know better what to do"
                         ].map((statement, idx) => `
                             <div class="mb-6">
                                 <p class="mb-3 text-center">${statement}</p>
                                 <div class="option-grid">
-                                    ${['-4', '-3', '-2', '-1', '0', '+1', '+2', '+3', '+4'].map((opt, i) => `
+                                    ${['0', '1', '2', '3', '4', '5', '6'].map((opt, i) => `
                                         <div>
                                             <input type="radio" name="conformity_${idx+1}" value="${opt}" id="conformity_${idx+1}_${i}" class="hidden">
                                             <label for="conformity_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem;">
                                                 <span class="text-sm font-semibold">${opt}</span>
+                                                ${i === 0 ? '<span class="text-xs text-gray-500">(Never)</span>' : ''}
+                                                ${i === 6 ? '<span class="text-xs text-gray-500">(Always)</span>' : ''}
                                             </label>
                                         </div>
                                     `).join('')}
@@ -763,7 +777,7 @@
                             </div>
                         `).join('')}
                     </div>
-                    <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },          
 // PART 1: CONSPIRACY BELIEFS
@@ -771,7 +785,7 @@
                 id: 'conspiracy_beliefs',
                 html: `
                     <div class="space-y-8">
-                      
+                    <p class="font-medium text-center">Please indicate how much you agree or disagree with each of the following statements.</p>
                         ${[
                             "The government permits or perpetrates acts of terrorism on its own soil, disguising its involvement.",
                             "Evidence of alien contact is being concealed from the public.",
@@ -782,63 +796,114 @@
                             <div class="mb-6">
                                 <p class="mb-3 text-center">${statement}</p>
                                 <div class="option-grid">
-                                    ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="gcb_${idx+1}" value="${i+1}" id="gcb_${idx+1}_${i}" class="hidden"><label for="gcb_${idx+1}_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
+                                    ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="gcb_${idx+1}" value="${i+1}" id="gcb_${idx+1}_${i}" class="hidden"><label for="gcb_${idx+1}_${i}" class="option-button">${opt}</label></div>`).join('')}
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                    <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },              
-            {
-                id: 'ai_abilities',
-                html: `
-                    <div class="space-y-8">
-                        <p class="text-gray-700 text-left">In the following, you will read descriptions of different abilities that one can have when dealing with artificial intelligence. These abilities can be more or less pronounced. Please rate yourself: How pronounced are your abilities?</p>
-                        <p class="text-gray-700 text-left">A value of <b>0</b> means that an ability is <b>not at all or hardly pronounced</b>.<br>A value of <b>10</b> means that an ability is <b>very well or (almost) perfectly pronounced</b>.</p>
+            // {
+            //     id: 'ai_abilities',
+            //     html: `
+            //         <div class="space-y-8">
+            //             <p class="text-gray-700 text-left">In the following, you will read descriptions of different abilities that one can have when dealing with artificial intelligence. These abilities can be more or less pronounced. Please rate yourself: How pronounced are your abilities?</p>
+            //             <p class="text-gray-700 text-left">A value of <b>0</b> means that an ability is <b>not at all or hardly pronounced</b>.<br>A value of <b>10</b> means that an ability is <b>very well or (almost) perfectly pronounced</b>.</p>
                                                 
-                        ${[
-                            "I can tell if I am dealing with an application based on artificial intelligence.",
-                            "I can program new applications in the field of \"artificial intelligence\".",
-                            "Although there are often new AI applications, I manage to always be \"up-to-date\".",
-                            "I can handle it when interactions with AI frustrate or frighten me.",
-                            "I can weigh the consequences of using AI for society.",
-                            "I can design new AI applications.",
-                            "I can use artificial intelligence meaningfully to achieve my goals.",
-                            "I can also usually solve strenuous and complicated tasks when working with artificial intelligence well.",
-                            "I can prevent an AI from influencing me in my decisions.",
-                            "I can assess what advantages and disadvantages the use of an artificial intelligence entails."
-                        ].map((statement, idx) => `
-                            <div class="mb-6">
-                                <p class="mb-3 text-center">${statement}</p>
-                                <div class="option-grid" style="grid-template-columns: repeat(11, 1fr); gap: 0.25rem;">
-                                    ${[ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ].map((opt, i) => `
-                                        <div style="min-width: 32px;">
-                                            <input type="radio" name="ai_ability_${idx+1}" value="${opt}" id="ai_ability_${idx+1}_${i}" class="hidden">
-                                            <label for="ai_ability_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.75rem;">
-                                                <span class="text-sm font-semibold">${opt}</span>
-                                            </label>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
+            //             ${[
+            //                 "I can tell if I am dealing with an application based on artificial intelligence.",
+            //                 "I can program new applications in the field of \"artificial intelligence\".",
+            //                 "Although there are often new AI applications, I manage to always be \"up-to-date\".",
+            //                 "I can handle it when interactions with AI frustrate or frighten me.",
+            //                 "I can weigh the consequences of using AI for society.",
+            //                 "I can design new AI applications.",
+            //                 "I can use artificial intelligence meaningfully to achieve my goals.",
+            //                 "I can also usually solve strenuous and complicated tasks when working with artificial intelligence well.",
+            //                 "I can prevent an AI from influencing me in my decisions.",
+            //                 "I can assess what advantages and disadvantages the use of an artificial intelligence entails."
+            //             ].map((statement, idx) => `
+            //                 <div class="mb-6">
+            //                     <p class="mb-3 text-center">${statement}</p>
+            //                     <div class="option-grid" style="grid-template-columns: repeat(11, 1fr); gap: 0.25rem;">
+            //                         ${[ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ].map((opt, i) => `
+            //                             <div style="min-width: 32px;">
+            //                                 <input type="radio" name="ai_ability_${idx+1}" value="${opt}" id="ai_ability_${idx+1}_${i}" class="hidden">
+            //                                 <label for="ai_ability_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.75rem;">
+            //                                     <span class="text-sm font-semibold">${opt}</span>
+            //                                 </label>
+            //                             </div>
+            //                         `).join('')}
+            //                     </div>
+            //                 </div>
+            //             `).join('')}
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //     `
+            // },
+            // PART 0: GABOR ORIENTATION TASK (GOT)
+            {
+                id: 'got_instructions',
+                html: `
+                    <div class="text-gray-700 space-y-4">
+                        <p>In this section, you will be presented with scrambled images very rapidly. Please do your best to identify what is in the scrambled images.</p>
+                        <p>After each image disappears, you will be asked to choose between two options representing what might have been in the image.</p>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                         <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                        <button onclick="startGOTTrial()" class="btn btn-primary">Start Task</button>
+                    </div>
+                    
+                `
+            },
+            {
+                id: 'got_task' // Content generated by renderGOTStep()
+            },
+            {
+                id: 'got_confidence_est',
+                html: `
+                    <div class="space-y-4 text-left text-gray-700">
+                        <p>You just saw 10 images. Because there were only two answer options on each of the images, anyone  who would have guessed randomly would have (on average) picked the correct option 5 out of 10 times.</p>
+                        <p class="font-medium mt-4">For how many of the images do you believe you chose the right options, beyond the chance level of 5, if any?</p>
+                        <p>[Please enter a number from 0 to 5 to indicate how many of the images you think you got correct above chance.]</p>
+                        <div class="mt-4 flex justify-center">
+                            <input type="number" name="got_est" id="got_est" min="0" max="5" step="1" class="w-1/4 p-2 border border-gray-300 rounded-md text-center">
+                        </div>
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
-            {
+             { // Moved CRT step here
                 id: 'crt',
-                html: `
-                    <h1 class="question-title">Final Questions Before We Get Started</h1>
-                    <div class="space-y-6">
-                        <div><label class="block font-medium mb-1">If you're running a race and you pass the person in second place, what place are you in?</label><input type="text" name="crt1" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium mb-1">A farmer had 15 sheep and all but 8 died. How many are left?</label><input type="text" name="crt2" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium mb-1">Emily’s father has three daughters. The first two are named April and May. What is the third daughter’s name?</label><input type="text" name="crt3" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium mb-1">How many cubic feet of dirt are there in a hole that is 3’ deep x 3’ wide x 3’ long?</label><input type="text" name="crt4" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                    </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
-                `
+                getHTML: () => {
+                    const crtQuestions = [
+                        { id: 'crt1', label: "If you're running a race and you pass the person in second place, what place are you in?" },
+                        { id: 'crt2', label: "A farmer had 15 sheep and all but 8 died. How many are left?" },
+                        { id: 'crt3', label: "Emily’s father has three daughters. The first two are named April and May. What is the third daughter’s name?" },
+                        { id: 'crt4', label: "How many cubic feet of dirt are there in a hole that is 3’ deep x 3’ wide x 3’ long?" }
+                    ];
+
+                    // Shuffle the questions array (Fisher-Yates shuffle)
+                    for (let i = crtQuestions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [crtQuestions[i], crtQuestions[j]] = [crtQuestions[j], crtQuestions[i]];
+                    }
+
+                    const questionsHTML = crtQuestions.map(q => `
+                        <div>
+                            <label class="block font-medium mb-1">${q.label}</label>
+                            <input type="text" name="${q.id}" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    `).join('');
+
+                    return `
+                        <h1 class="question-title">Final Questions Before the Main Task</h1>
+                        <div class="space-y-6">
+                            ${questionsHTML}
+                        </div>
+                        <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    `;
+                }
             },
 
             // PART 3: THE HEADLINE EVALUATION TASK
@@ -846,14 +911,12 @@
                 id: 'task_transition',
                 html: `
                     <div class="text-left">
-                        <h1 class="text-2xl font-bold mb-4">Headline Task</h1>
                         <p class="text-gray-600 mb-6">Now for the main part of the study. You will be presented with a series of news headlines as they would appear on social media and asked to evaluate them.</p>
                         <p>For each headline, you will be asked to rate the following:</p>
                         <br>
                         <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
                             <li class="mb-2">Is the headline accurate?</li>
                             <li class="mb-2">How confident are you in your judgment?</li>
-                            <li class="mb-2">How likely would you be to share it?</li>
                             <li>Have you seen or heard about the headline before?</li>
                         </ol>
                         <br>
@@ -874,10 +937,10 @@
                 getHTML: () => {
                     const options = [
                         // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
-                        { id: 'ss_humans', value: 'Human-only', text: 'Group of humans', description: 'You will see how six other people judged the headline’s accuracy.' },
-                        { id: 'ss_llms', value: 'LLM-only', text: 'Group of Artificial Intelligence (AI) Chat Bots', description: 'You will see how six different AI chat bots (like ChatGPT or Gemini) judged the headline’s accuracy.' },
-                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Hybrid group of humans and Artificial Intelligence (AI) Chat Bots', description: 'You will see how a mixed group of three humans and three AI chat bots judged the headline’s accuracy.' },
-                        { id: 'ss_none', value: 'Control', text: 'No advisor', description: 'You will not receive any advice and will rate the headlines on your own.' }
+                        { id: 'ss_humans', value: 'Human-only', text: 'Receive advice from six different humans.', description: 'You will receive advice from six different humans.' },
+                        { id: 'ss_llms', value: 'LLM-only', text: 'Receive advice from six different AI chat bots (like ChatGPT or Gemini).', description: 'You receive advice from six different AI chat bots (like ChatGPT or Gemini).' },
+                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Receive advice from three different humans and three different AI chat bots.', description: 'You will receive advice from three different humans and three different AI chat bots.' },
+                        { id: 'ss_none', value: 'Control', text: 'No advice.', description: 'You will not receive any advice.' }
                     ];
 
                     // Shuffle the options array (Fisher-Yates shuffle)
@@ -890,14 +953,13 @@
                         <div>
                             <input type="radio" id="${opt.id}" name="self_select" value="${opt.value}" class="hidden">
                             <label for="${opt.id}" class="option-label">
-                                <b>${opt.text}:</b>
-                                <span class="font-normal block mt-1">${opt.description}</span>
+                                <b>${opt.text}</b>
                             </label>
                         </div>
                     `).join('');
 
                     return `
-                        <h1 class="question-title">A Note On Your Advisor</h1>
+                        <h1 class="question-title">Your Advisors</h1>
                         <p class="mb-6">For the upcoming headlines, you can choose the advisor you would like to receive advice from. Please read the descriptions and make your selection.</p>
                         <div id="self-select-options" class="space-y-4">
                            ${optionsHTML}
@@ -917,19 +979,19 @@
                     const adviceCondition = selfSelectChoice || userCondition;
                     let info = '';
                     switch(adviceCondition) {
-                        case 'Fact-checker': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from a <strong>fact-checking organization</strong>. For each headline, you will see its final judgment. An icon presented in <strong>green</strong> will indicate an <strong>accurate</strong> judgment (that the headline comes from a credible source), whereas an icon in <strong>red</strong> will indicate an <strong>inaccurate</strong> judgment (as determined by a fact-checker).</p>`; break;
-                        case 'Human-only': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from <strong>six human raters</strong>. For each headline, you will see how each of the six humans judged its accuracy. An icon presented in <strong>green</strong> will indicate that the headline was judged as <strong>accurate</strong>, whereas an icon in <strong>red</strong> will indicate that the headline was judged as <strong>inaccurate</strong>.</p>`; break;
-                        case 'LLM-only': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from <strong>six different AI chat bots</strong>. For each headline, you will see how each of the six AI chat bots judged its accuracy. An icon presented in <strong>green</strong> will indicate that the headline was judged as <strong>accurate</strong>, whereas an icon in <strong>red</strong> will indicate that the headline was judged as <strong>inaccurate</strong>.</p>`; break;
-                        case 'Hybrid': info = `<p class="mb-4">With each headline you will be presented with, you will receive advice from a group of <strong>three humans and three AI chat bots</strong>. For each headline, you will see how all six advisors judged its accuracy. An icon presented in <strong>green</strong> will indicate that the headline was judged as <strong>accurate</strong>, whereas an icon in <strong>red</strong> will indicate that the headline was judged as <strong>inaccurate</strong>.</p>`; break;
+                        case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization with each headline. A red icon indicates that the fact-checker deemed this headline to be inaccurate. A green icon indicates an accurate judgment (meaning the headline comes from a credible source).</p>`; break;
+                        case 'Human-only': info = `<p class="mb-4">For each headline, you will see how each of the six human raters judged its accuracy. A red icon indicates the headline was judged as inaccurate, and a green icon indicates the headline was judged as accurate.</p>`; break;
+                        case 'LLM-only': info = `<p class="mb-4">For each headline, you will see how each of the six AI chat bots judged its accuracy. An icon presented in green will indicate that the headline was judged as accurate, whereas an icon in red will indicate that the headline was judged as inaccurate.</p>`; break;
+                        case 'Hybrid': info = `<p class="mb-4">For each headline, you will see how three different humans and three different AI chatbots  judged its accuracy. A red icon indicates the headline was judged as inaccurate (either by a human or an AI), a green icon indicates the headline was judged as accurate.</p>`; break;
                     }
                     const exampleHTML = getAdviceExampleHTML(adviceCondition);
                     return `
                         <div>
-                            <h1 class="question-title">A Note On Your Advisor</h1>
+                            <h1 class="question-title">Your Advisors</h1>
                             <div class="text-gray-700 space-y-4 my-8">
                                 ${info}
                                 ${exampleHTML}
-                                <p class="text-gray-600 mt-6">This advice will be displayed above each headline to help you make your judgment.</p>
+                                <p class="text-gray-600 mt-6">This advice will be displayed above each headline.</p>
                             </div>
                             <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                         </div>
@@ -942,7 +1004,7 @@
                 getHTML: () => `
                     <div class="text-center">
                         <h1 class="text-2xl font-bold mb-4">All Set!</h1>
-                        <p class="text-gray-600 mb-6">You are all set to go. You will now see 32 news headlines. Please try your best to evaluate them.</p>
+                        <p class="text-gray-600 mb-6">The practice round is over. You will now see 32 news headlines. Please try your best to evaluate them.</p>
                         <div class="flex justify-center">
                             <button onclick="nextStep()" class="btn btn-primary">Start</button>
                         </div>
@@ -957,7 +1019,7 @@
                 id: 'transition',
                 html: `
                     <div class="text-center">
-                        <h1 class="text-2xl font-bold mb-4">Great Work!</h1>
+                        <h1 class="text-2xl font-bold mb-4">Thanks!</h1>
                         <p class="text-gray-600 mb-6">You've rated all the headlines. Now, we have just a few final questions. Please remember that all your responses will be treated anonymously.</p>
                         <button onclick="nextStep()" class="btn btn-primary">Next</button>
                     </div>
@@ -968,18 +1030,14 @@
                 id: 'advisor_trust_post', // Renamed ID for clarity
                 condition: () => (selfSelectChoice || userCondition) !== 'Control',
                 html: `
-                    <h1 class="question-title">Your Advisor</h1>
                     <div class="space-y-8">
                         <p class="text-gray-700 text-left">On a scale going from <b>0 (Not at all)</b> to <b>7 (Very)</b>, how much do you think the advisor group you received advice from has the following attributes?</p>
 
-                        ${[ // Combined list of all attributes
-                            'reliable', 'predictable', 'dependable', 'consistent',
-                            'competent', 'skilled', 'capable', 'meticulous',
-                            'ethical', 'principled', 'moral', 'has integrity',
-                            'transparent', 'genuine', 'sincere', 'candid',
-                            'benevolent', 'kind', 'considerate', 'has goodwill'
+                        ${[ // Performance Trust Subscale Items
+                            'reliable', 'predictable', 'dependable', 'consistent', // Reliable subscale
+                            'competent', 'skilled', 'capable', 'meticulous'      // Competent subscale
                         ].map((item, idx) => `
-                            <div class="mb-4 pt-4 border-t">
+                            <div class="mb-4">
                                 <p class="mb-3 text-center capitalize font-medium">${item}</p>
                                 <div class="option-grid" style="grid-template-columns: repeat(8, 1fr); gap: 0.25rem;">
                                     ${[ '0', '1', '2', '3', '4', '5', '6', '7' ].map((opt, i) => `
@@ -996,26 +1054,31 @@
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
+            },
+                        {
+                id: 'selfSelect_noAdvisor_reason',
+                condition: (c) => c === 'Self-select' && selfSelectChoice === 'Control',
+                html: `
+                    <div class="space-y-4">
+                        <label class="block font-medium mb-3 text-center" for="no_advisor_reason">Why did you choose the 'No advisor' condition?</label>
+                        <textarea id="no_advisor_reason" name="no_advisor_reason" class="w-full p-2 border border-gray-300 rounded-md" rows="6" placeholder="Your reason..."></textarea>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
             },            
             {
                 id: 'headline_perception',
                 html: `
-                    <h1 class="question-title">Your Perception of the Headlines</h1>
                     <div class="space-y-8">
                         
                         <!-- Question 1: Relevance -->
                         <div class="mb-6 pt-4 border-t">
                             <p class="mb-3 text-center font-medium">The headlines I evaluated were relevant to me.</p>
                             <div class="option-grid">
-                                ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="headline_relevance" value="${i+1}" id="hl_rel_${i}" class="hidden"><label for="hl_rel_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
-                            </div>
-                        </div>
-
-                        <!-- Question 2: Importance -->
-                        <div class="mb-6 pt-4 border-t">
-                            <p class="mb-3 text-center font-medium">The headlines I evaluated were important.</p>
-                            <div class="option-grid">
-                                ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="headline_importance" value="${i+1}" id="hl_imp_${i}" class="hidden"><label for="hl_imp_${i}" class="option-button">${opt} <span class='text-xs text-gray-400'>(${i+1})</span></label></div>`).join('')}
+                                ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `<div><input type="radio" name="headline_relevance" value="${i+1}" id="hl_rel_${i}" class="hidden"><label for="hl_rel_${i}" class="option-button">${opt}</label></div>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -1053,13 +1116,27 @@
             //         </div>
             //     `
             // },            
+            // PART 4: FINAL FEEDBACK
+            {
+                id: 'feedback',
+                html: `
+                    <div class="space-y-4">
+                        <label class="block font-medium mb-3 text-center" for="general_feedback">Do you have any feedback or suggestions for the study?</label>
+                        <textarea id="general_feedback" name="general_feedback" class="w-full p-2 border border-gray-300 rounded-md" rows="6"></textarea>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
+                `
+            },
             // PART 4: DEBUNKING & DEBRIEF
             {
                 id: 'debunking',
                 condition: () => allHeadlines.some(h => !h.isTrue), // Only show if there were false headlines
                 getHTML: () => `
-                    <h1 class="text-2xl font-bold text-center mb-2">Wrapping up!</h1>
-                        <p class="text-center mb-6">This study aims to understand how different types of advice affect people's ability to judge the accuracy of news headlines. Some of the headlines you saw were false. Fact-check for these headlines are presented below.</p>
+                    <h1 class="text-2xl font-bold text-center mb-2">Debrief</h1>
+                        <p class="text-center mb-6">This study aims to understand how different types of advice affect people's ability to judge the accuracy of news headlines. Some of the headlines you saw were false. The fact-checks for these false headlines are presented below.</p>
                     <div id="debunkDisplay" class="flex flex-col items-center space-y-4 bg-red-50 border-2 border-red-200 p-6 rounded-lg shadow-md">
                         <h3 class="text-2xl font-bold text-red-700 mb-4">THIS HEADLINE IS FALSE.</h3>
                         <img id="debunkImage" src="" alt="Debunked headline image" class="max-h-64 rounded-lg shadow" />
@@ -1167,7 +1244,7 @@
                 case 'Human-only':
                     const humanRatings = ratings.human; // Use stored ratings
                     const humanAccurateCount = humanRatings.filter(r => r).length;
-                    adviceTitle = `${humanAccurateCount} out of 6 human rated the headline as <strong>Accurate</strong>.`;
+                    adviceTitle = `${humanAccurateCount} out of 6 humans rated the headline as <strong>Accurate</strong>.`;
                     iconsHTML = [...humanRatings].sort((a, b) => b - a).map(rating => 
                         `<img src="${rating ? ICONS.human.green : ICONS.human.red}" alt="Human rating" class="advice-icon">`
                     ).join('');
@@ -1221,8 +1298,8 @@
         }
 
         function renderHeadlineStep() {
-            const totalQuestions = allHeadlines.length * 4;
-            const questionsCompleted = currentHeadlineIndex * 4 + currentQuestionInLoop;
+            const totalQuestions = allHeadlines.length * 3; // Changed from 2 to 3
+            const questionsCompleted = currentHeadlineIndex * 3 + currentQuestionInLoop; // Changed from 2 to 3
             const progress = (questionsCompleted / totalQuestions) * 100;
             
             document.getElementById('progress-container').classList.remove('hidden');
@@ -1244,7 +1321,7 @@
                 case 0: // Veracity
                     questionHTML = `
                         <div>
-                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
                                 <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
                                 <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
@@ -1262,17 +1339,7 @@
                             </div>
                         </div>`;
                     break;
-                case 2: // Sharing Intent
-                    questionHTML = `
-                        <div>
-                            <p class="font-medium mb-3 text-center">If you were to see the above headline on social media, how likely would you be to share it?</p>
-                            <div class="option-grid">
-                            ${['Very<br>unlikely', 'Moderately<br>unlikely', 'Slightly<br>unlikely', 'Slightly<br>likely', 'Moderately<br>likely', 'Very<br>likely'].map((o,i)=>`<div><input type="radio" name="sharing" value="${o.replace('<br>',' ')}" id="share_${i}" class="hidden"><label for="share_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                    `;
-                    break;
-                case 3: // Familiarity
+                case 2: // Familiarity (was case 1)
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1321,7 +1388,7 @@
                 case 0: // Veracity
                     questionHTML = `
                         <div>
-                            <p class="font-medium mb-3 text-center">To the best of your knowledge, is this headline accurate?</p>
+                            <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
                                 <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
                                 <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
@@ -1339,17 +1406,7 @@
                             </div>
                         </div>`;
                     break;
-                case 2: // Sharing Intent
-                    questionHTML = `
-                        <div>
-                            <p class="font-medium mb-3 text-center">If you were to see the above headline on social media, how likely would you be to share it?</p>
-                            <div class="option-grid">
-                            ${['Very<br>unlikely', 'Moderately<br>unlikely', 'Slightly<br>unlikely', 'Slightly<br>likely', 'Moderately<br>likely', 'Very<br>likely'].map((o,i)=>`<div><input type="radio" name="sharing" value="${o.replace('<br>',' ')}" id="share_${i}" class="hidden"><label for="share_${i}" class="option-button">${o}</label></div>`).join('')}
-                            </div>
-                        </div>
-                    `;
-                    break;
-                case 3: // Familiarity
+                case 2: // Familiarity (was case 1)
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1380,11 +1437,113 @@
             });
         }
         
+        // --- GOT Task Logic ---
+        function startGOTTrial() {
+            // Set currentStep to the GOT task step index
+            currentStep = surveySteps.findIndex(step => step.id === 'got_task');
+            if (currentStep === -1) {
+                console.error("GOT task step not found!");
+                 // Attempt to find the step after instructions as a fallback
+                const instructionIndex = surveySteps.findIndex(step => step.id === 'got_instructions');
+                if (instructionIndex !== -1 && instructionIndex + 1 < surveySteps.length) {
+                    currentStep = instructionIndex + 1;
+                } else {
+                     currentStep = 1; // Default fallback if really lost
+                     console.warn("Falling back to assuming GOT task is at index 1.");
+                }
+            }
+
+            // Shuffle GOT items at the start of the task
+            for (let i = got_items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [got_items[i], got_items[j]] = [got_items[j], got_items[i]];
+            }
+            currentGOTTrial = 0;
+            surveyData.got_answers = []; // Clear previous answers if restarting
+            renderGOTStep();
+        }
+
+        function renderGOTStep() {
+            const trialData = got_items[currentGOTTrial];
+            
+            // Phase 1: Show image briefly
+            app.innerHTML = `
+                <div class="flex justify-center items-center h-96"> 
+                    <img id="got_image_display" src="${trialData.image}" alt="Scrambled Image" class="max-h-full max-w-full"/>
+                </div>
+            `;
+            
+            gotStartTime = Date.now(); // Record start time when image appears
+
+            // Hide image after a short duration (e.g., 500ms) and show questions
+            setTimeout(() => {
+                showGOTQuestions(trialData);
+            }, 250); // Adjust duration as needed
+        }
+
+        function showGOTQuestions(trialData) {
+            app.innerHTML = `
+                <div class="space-y-8">
+                    <div>
+                        <p class="font-medium mb-3 text-center">Was that a ${trialData.field1} or a ${trialData.field2}?</p>
+                        <div class="option-grid grid grid-cols-2">
+                             <div><input type="radio" name="got_choice" value="${trialData.field1}" id="got_choice_1" class="hidden"><label for="got_choice_1" class="option-button">${trialData.field1}</label></div>
+                             <div><input type="radio" name="got_choice" value="${trialData.field2}" id="got_choice_2" class="hidden"><label for="got_choice_2" class="option-button">${trialData.field2}</label></div>
+                        </div>
+                    </div>
+                    <!-- <div>
+                        <p class="font-medium mb-3 text-center">How confident are you that you are correct?</p>
+                        <div class="flex flex-col items-center w-full max-w-lg mx-auto py-4">
+                            <output for="got_confidence_slider" id="got_slider_value_display" class="mb-2">Confidence: 50</output>
+                            <input type="range" name="got_confidence" id="got_confidence_slider" min="0" max="100" step="1" value="50" oninput="document.getElementById('got_slider_value_display').textContent = 'Confidence: ' + this.value" class="w-full">
+                            <div class="flex justify-between w-full text-sm text-gray-600 mt-2">
+                                <span>Not at all confident (0)</span>
+                                <span>Highly confident (100)</span>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+                 <div class="flex justify-center mt-8">
+                    <button onclick="nextGOTTrial()" class="btn btn-primary">Next</button>
+                 </div>
+            `;
+        }
+
+        function nextGOTTrial() {
+            const endTime = Date.now();
+            const reactionTime = endTime - gotStartTime;
+
+            const choiceInput = app.querySelector('input[name="got_choice"]:checked');
+            // const confidenceInput = app.querySelector('input[name="got_confidence"]');
+            
+            const trialResult = {
+                trial: currentGOTTrial + 1,
+                image: got_items[currentGOTTrial].image,
+                option1: got_items[currentGOTTrial].field1,
+                option2: got_items[currentGOTTrial].field2,
+                choice: choiceInput ? choiceInput.value : 'not_answered',
+                // confidence: confidenceInput ? confidenceInput.value : 'not_answered',
+                confidence: 'N/A (commented out)',
+                reactionTime: reactionTime
+            };
+            surveyData.got_answers.push(trialResult);
+
+            currentGOTTrial++;
+            if (currentGOTTrial >= got_items.length) {
+                // Move to the next main survey step after GOT is done
+                currentStep++; 
+                renderStep();
+            } else {
+                renderGOTStep(); // Render the next GOT trial
+            }
+        }
+        // --- End GOT Task Logic ---
+
         let debunkableHeadlines = [];
         let currentDebunkIndex = 0;
 
         function renderDebunkStep() {
-            debunkableHeadlines = allHeadlines.filter(h => !h.isTrue);
+            debunkableHeadlines = allHeadlines.filter(h => !h.isTrue && h.text !== "Attention check");
             currentDebunkIndex = 0;
             
             app.innerHTML = surveySteps.find(s => s.id === 'debunking').getHTML();
@@ -1449,7 +1608,6 @@
             app.innerHTML = `<p class="text-center text-gray-500">Please select a condition from the test menu above to begin the survey.</p>`;
         }
 
-
         function renderStep() {
             const stepData = surveySteps[currentStep];
             if (!stepData) return;
@@ -1473,6 +1631,12 @@
                     renderStep();
                     return;
                 }
+            }
+            
+            if (stepData.id === 'got_task') {
+                // GOT task rendering is handled by its specific functions
+                // This prevents renderStep from overwriting the GOT image display prematurely
+                return; 
             }
             
             if (stepData.id === 'practice_round') {
@@ -1557,7 +1721,7 @@
                 surveyData.practice[input.name] = input.value;
             }
             currentPracticeQuestion++;
-            if (currentPracticeQuestion >= 4) {
+            if (currentPracticeQuestion >= 3) { // Changed from 2 to 3
                 currentStep++;
                 renderStep();
             } else {
@@ -1577,7 +1741,7 @@
         function nextHeadline() {
             saveData(`headlineLoop-q${currentQuestionInLoop}`);
             currentQuestionInLoop++;
-            if (currentQuestionInLoop >= 4) {
+            if (currentQuestionInLoop >= 3) { // Changed from 2 to 3
                 currentHeadlineIndex++;
                 currentQuestionInLoop = 0;
             }
@@ -1605,7 +1769,7 @@
             if (currentQuestionInLoop < 0) {
                 if (currentHeadlineIndex > 0) {
                     currentHeadlineIndex--;
-                    currentQuestionInLoop = 3; // Go to the last question of the previous headline
+                    currentQuestionInLoop = 2; // Go to the last question of the previous headline (was 1)
                 } else {
                     currentQuestionInLoop = 0; // Stay on the first question of the first headline
                 }
@@ -1634,10 +1798,10 @@
                     // Special handling if we're moving back to the headline loop
                     if (stepData.id === 'headlineLoop') {
                         currentHeadlineIndex = allHeadlines.length - 1;
-                        currentQuestionInLoop = 3; 
+                        currentQuestionInLoop = 2; // (was 1)
                     }
                     if (stepData.id === 'practice_round') {
-                        currentPracticeQuestion = 3;
+                        currentPracticeQuestion = 2; // (was 1)
                     }
                     
                     renderStep();
@@ -1744,18 +1908,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
