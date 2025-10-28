@@ -522,8 +522,8 @@
                     const groups = [
                         { label: 'The National Government', name: 'trust_gov' },
                         // { label: 'Large corporations', name: 'trust_corp' },
-                        { label: 'News Media', name: 'trust_trad_media' },
-                        // { label: 'Digital media (e.g., social media)', name: 'trust_new_media' }
+                        { label: 'News Media (e.g., press, television)', name: 'trust_trad_media' },
+                        { label: 'Social Media (e.g., Facebook, TikTok, X)', name: 'trust_new_media' }
                         // { label: 'Scientists', name: 'trust_sci' },
                         // { label: 'People in general', name: 'trust_ppl' }
                     ];
@@ -1052,6 +1052,20 @@
                         `).join('')}
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                `
+            },
+                        {
+                id: 'selfSelect_noAdvisor_reason',
+                condition: (c) => c === 'Self-select' && selfSelectChoice === 'Control',
+                html: `
+                    <div class="space-y-4">
+                        <label class="block font-medium mb-3 text-center" for="no_advisor_reason">Why did you choose the 'No advisor' condition?</label>
+                        <textarea id="no_advisor_reason" name="no_advisor_reason" class="w-full p-2 border border-gray-300 rounded-md" rows="6" placeholder="Your reason..."></textarea>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                    </div>
                 `
             },            
             {
@@ -1901,6 +1915,7 @@
     </script>
 </body>
 </html>
+
 
 
 
