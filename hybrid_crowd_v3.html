@@ -475,8 +475,8 @@
                             <p><strong>Welcome, and thank you for taking part!</strong></p>
                             <p>This study is about how people interact with news in today's digital world. It has two parts:</p>
                             <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
-                                <li class="mb-2">First, we will ask some general questions.</li>
-                                <li>Second, you will be presented with a series of news headlines and asked to evaluate them.</li>
+                                <li class="mb-2">In Part 1, we will ask you some general questions.</li>
+                                <li>In Part 2, you will be asked to evaluate a series of news headlines.</li>
                             </ol>
                             <p class="text-sm text-gray-500 mt-4">Note that the study contains attention checks.</p>
                         </div>
@@ -534,11 +534,11 @@
                 id: 'trust_questions',
                 getHTML: () => {
                     const groups = [
-                        { label: 'The National Government', name: 'trust_gov' },
+                        { label: 'The Government', name: 'trust_gov' },
                         // { label: 'Large corporations', name: 'trust_corp' },
                         { label: 'News Media (e.g., press, television)', name: 'trust_trad_media' },
-                        { label: 'Social Media (e.g., Facebook, TikTok, X)', name: 'trust_new_media' }
-                        // { label: 'Scientists', name: 'trust_sci' },
+                        { label: 'Content Creators', name: 'trust_new_media' },
+                        { label: 'Fact-checkers', name: 'trust_fact_checkers' }
                         // { label: 'People in general', name: 'trust_ppl' }
                     ];
 
@@ -586,31 +586,26 @@
                     <div class="space-y-8">
                         <!-- Question 1 -->
                         <div>
-                            <p class="font-medium mb-3 text-center">I think one can trust most news most of the time</p>
+                            <p class="font-medium mb-3 text-center">How important is it for you to be up to date with the news?</p>
                             <div class="option-grid">
-                                ${['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['Not at all important', 'A little important', 'Moderately important', 'Very important', 'Extremely important'].map((o,i) => `<div><input type="radio" name="trust_news_general" value="${i+1}" id="tng_${i}" class="hidden"><label for="tng_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
 
                         <!-- Question 2 -->
                         <div>
-                            <p class="font-medium mb-3 text-center">I think I can trust most of the news I consume most of the time</p>
+                            <p class="font-medium mb-3 text-center">Which would you say is your MAIN source of news?</p>
                             <div class="option-grid">
-                                ${['Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
+                                ${['TV', 'Print', 'Social and video networks', 'Online news sites/apps', 'News podcasts', 'AI chatbots'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
                             </div>
                         </div>
 
                         <!-- Question 3 -->
                         <div>
-                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top three news sources you trust:</label>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top three news sources you consume (this can include news outlets, channels on social media, and influencers):</label>
                             <textarea id="top_3_news_trust" name="top_3_news_trust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
                         </div>
 
-                        <!-- Question 4 (New) -->
-                        <div>
-                            <label class="block font-medium mb-3 text-center" for="top_3_news_distrust">Please list the top three news sources you distrust:</label>
-                            <textarea id="top_3_news_distrust" name="top_3_news_distrust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
-                        </div>
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
@@ -803,7 +798,7 @@
                         ${[
                             "The government permits or perpetrates acts of terrorism on its own soil, disguising its involvement.",
                             "Evidence of alien contact is being concealed from the public.",
-                            "New and advanced technology which would harm current industry is being suppressed.",
+                            "New and advanced technology, which would harm current industry, is being suppressed.",
                             "Certain significant events have been the result of the activity of a small group who secretly manipulate world events.",
                             "Experiments involving new drugs or technologies are routinely carried out on the public without their knowledge or consent."
                         ].map((statement, idx) => `
@@ -877,11 +872,11 @@
                 id: 'got_confidence_est',
                 html: `
                     <div class="space-y-4 text-left text-gray-700">
-                        <p>You just saw 10 images. Because there were only two answer options on each of the images, anyone  who would have guessed randomly would have (on average) picked the correct option 5 out of 10 times.</p>
-                        <p class="font-medium mt-4">For how many of the images do you believe you chose the right options, beyond the chance level of 5, if any?</p>
-                        <p>[Please enter a number from 0 to 5 to indicate how many of the images you think you got correct above chance.]</p>
+                        <p>You just saw 10 images. Because there were only two answer options on each of the images, anyone who guessed randomly would have (on average) picked the correct option 5 out of 10 times.</p>
+                        <p class="font-medium mt-4">For how many of the images do you believe you chose the right options?</p>
+                        <p>[Please enter a number between 0 and 10 to indicate how many of the images you think you got correct. (Note: those who guessed would have gotten 5 correct on average).]</p>
                         <div class="mt-4 flex justify-center">
-                            <input type="number" name="got_est" id="got_est" min="0" max="5" step="1" class="w-1/4 p-2 border border-gray-300 rounded-md text-center">
+                            <input type="number" name="got_est" id="got_est" min="0" max="10" step="1" class="w-1/4 p-2 border border-gray-300 rounded-md text-center">
                         </div>
                     </div>
                     <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
@@ -930,7 +925,6 @@
                         <br>
                         <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
                             <li class="mb-2">Is the headline accurate?</li>
-                            <li class="mb-2">How confident are you in your judgment?</li>
                             <li>Have you seen or heard about the headline before?</li>
                         </ol>
                         <br>
@@ -1048,8 +1042,9 @@
                         <p class="text-gray-700 text-left">On a scale going from <b>0 (Not at all)</b> to <b>7 (Very)</b>, how much do you think the advisor group you received advice from has the following attributes?</p>
 
                         ${[ // Performance Trust Subscale Items
-                            'reliable', 'predictable', 'dependable', 'consistent', // Reliable subscale
-                            'competent', 'skilled', 'capable', 'meticulous'      // Competent subscale
+                            'reliable', // Reliable subscale
+                            'competent',       // Competent subscale
+                            'trustworthy',       // Trustworthy subscale
                         ].map((item, idx) => `
                             <div class="mb-4">
                                 <p class="mb-3 text-center capitalize font-medium">${item}</p>
@@ -1337,23 +1332,11 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
-                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
+                                ${['Accurate,<br>very<br>confident', 'Accurate,<br>moderately<br>confident', 'Accurate,<br>slightly<br>confident', 'Accurate,<br>not at all<br>confident', 'Inaccurate,<br>not at all<br>confident', 'Inaccurate,<br>slightly<br>confident', 'Inaccurate,<br>moderately<br>confident', 'Inaccurate,<br>very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
-                case 1: // Confidence
-                    const judgment = surveyData.answers[currentHeadlineIndex]?.veracity || '';
-                    const judgmentText = judgment ? `[Your judgment: "<b>${judgment}</b>"]` : '';
-                    questionHTML = `
-                        <div>
-                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
-                            <div class="option-grid">
-                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
-                            </div>
-                        </div>`;
-                    break;
-                case 2: // Familiarity (was case 1)
+                case 1: // Familiarity (was case 1)
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1404,19 +1387,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                <div><input type="radio" name="veracity" value="Yes, accurate" id="ver_acc" class="hidden"><label for="ver_acc" class="option-button">Yes, accurate</label></div>
-                                <div><input type="radio" name="veracity" value="No, inaccurate" id="ver_inacc" class="hidden"><label for="ver_inacc" class="option-button">No, inaccurate</label></div>
-                            </div>
-                        </div>`;
-                    break;
-                case 1: // Confidence
-                    const practiceJudgment = surveyData.practice?.veracity || '';
-                    const judgmentText = practiceJudgment ? `[Your judgment: "<b>${practiceJudgment}</b>"]` : '';
-                    questionHTML = `
-                        <div>
-                            <p class="font-medium mb-3 text-center">How confident are you in your judgment? <span class="text-gray-500 font-normal">${judgmentText}</span></p>
-                            <div class="option-grid">
-                            ${['Not at all<br>confident', 'Slightly<br>confident', 'Moderately<br>confident', 'Very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            ${['Accurate,<br>very<br>confident', 'Accurate,<br>moderately<br>confident', 'Accurate,<br>slightly<br>confident', 'Accurate,<br>not at all<br>confident', 'Inaccurate,<br>not at all<br>confident', 'Inaccurate,<br>slightly<br>confident', 'Inaccurate,<br>moderately<br>confident', 'Inaccurate,<br>very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
