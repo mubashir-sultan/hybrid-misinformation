@@ -56,6 +56,8 @@
         .option-label.selected-rank {
             background-color: #dbeafe;
             border-color: #3b82f6;
+            font-weight: 600; /* Added for consistency */
+            color: #1e40af; /* Added for consistency */
         }
         .rank-badge {
             display: inline-block;
@@ -434,6 +436,7 @@
         let currentGOTTrial = 0; // Track current GOT trial index
         let gotStartTime; // To record reaction time
         let advisorRankings = []; // To store advisor preference ranks
+        let newsSourceRankings = []; // To store news source preference ranks
 
         const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'];
         let userCondition = '';
@@ -492,9 +495,9 @@
                 condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'].includes(c),
                 getHTML: () => {
                     const options = [
-                        { id: 'pref_humans', value: 'Human-only', text: 'A group of humans: Receiving independent advice from several different people.' },
-                        { id: 'pref_llms', value: 'LLM-only', text: 'A group of artificial intelligence (AI) chat bots: Receiving independent advice from several different AI chat bots.' },
-                        { id: 'pref_hybrid', value: 'Hybrid', text: 'A mixed group of human and artificial intelligence (AI) chat bots: Receiving independent advice from several different persons and several different AI chat bots.' }
+                        { id: 'pref_humans', value: 'Human-only', text: '<strong>A group of humans</strong>: Human adults that observed the same news and independently judged whether they thought that the news was accurate or inaccurate.' },
+                        { id: 'pref_llms', value: 'LLM-only', text: '<strong>A group of artificial intelligence (AI) chat bots</strong>: AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news and independently judged whether they thought that the news was accurate or inaccurate.' },
+                        { id: 'pref_hybrid', value: 'Hybrid', text: '<strong>A combination of humans and artificial intelligence (AI) chat bots</strong>: A combination of human adults and AI chat bots that observed the same news and independently judged whether they thought the news was accurate or inaccurate. ' }
                     ];
                     // Shuffle the options array (Fisher-Yates shuffle)
                     for (let i = options.length - 1; i > 0; i--) {
@@ -509,13 +512,13 @@
                                  data-value="${opt.value}" 
                                  class="option-label option-rank-button" 
                                  onclick="handleAdvisorRank(this, '${opt.value}')">
-                                <b>${opt.text}</b>
+                                ${opt.text}
                             </div>
                         </div>
                     `).join('');
 
                     return `
-                        <p class="mb-6 font-medium text-center">When evaluating the accuracy of online information, which of the following sources would you most prefer to receive advice from? Please rank your choices in order of preference.</p>
+                        <p class="mb-6 font-medium text-center">Imagine you encounter news online and are unsure if it is accurate. Which of the following sources would you most prefer to receive advice from? Please rank your choices in order of preference.</p>
                         <div id="advisor-preference-options" class="space-y-4">
                             ${optionsHTML}
                         </div>
@@ -534,11 +537,10 @@
                 id: 'trust_questions',
                 getHTML: () => {
                     const groups = [
-                        { label: 'The Government', name: 'trust_gov' },
-                        // { label: 'Large corporations', name: 'trust_corp' },
-                        { label: 'News Media (e.g., press, television)', name: 'trust_trad_media' },
-                        { label: 'Content Creators', name: 'trust_new_media' },
-                        { label: 'Fact-checkers', name: 'trust_fact_checkers' }
+                        { label: 'The Federal Government', name: 'trust_gov' },
+                        { label: 'News Organizations (e.g., newspapers, TV networks, online news sites)', name: 'trust_trad_media' },
+                        { label: 'Content creators (e.g., YouTubers, podcasters, social media influencers)', name: 'trust_new_media' },
+                        { label: 'Professional Fact-Checkers', name: 'trust_fact_checkers' }
                         // { label: 'People in general', name: 'trust_ppl' }
                     ];
 
@@ -594,20 +596,35 @@
 
                         <!-- Question 2 -->
                         <div>
-                            <p class="font-medium mb-3 text-center">Which would you say is your MAIN source of news?</p>
-                            <div class="option-grid">
-                                ${['TV', 'Print', 'Social and video networks', 'Online news sites/apps', 'News podcasts', 'AI chatbots'].map((o,i) => `<div><input type="radio" name="trust_news_consumed" value="${i+1}" id="tnc_${i}" class="hidden"><label for="tnc_${i}" class="option-button">${o}</label></div>`).join('')}
+                            <p class="font-medium mb-3 text-center">Which would you say are your MAIN sources of news? Please rank your top 3 choices in order of preference.</p>
+                            <div id="news-source-options" class="option-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                                ${['TV', 'Print', 'Social and video networks', 'Online news sites/apps', 'News podcasts', 'AI chat bots'].map((o,i) => `
+                                    <div id="ns_pref_${i}"
+                                         data-value="${o}"
+                                         class="option-label option-rank-button" 
+                                         onclick="handleNewsSourceRank(this, '${o}')"
+                                         style="height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem 0.5rem; font-size: 0.875rem; line-height: 1.25;">
+                                       ${o}
+                                    </div>
+                                `).join('')}
                             </div>
+                            <div id="news-source-rank-error" class="text-red-500 text-sm mt-4 text-center hidden">Please rank your top three options to continue.</div>
                         </div>
 
                         <!-- Question 3 -->
                         <div>
-                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top three news sources you consume (this can include news outlets, channels on social media, and influencers):</label>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top news sources you consume (this can include newspapers, online news sites, YouTubers, social media influencers):</label>
                             <textarea id="top_3_news_trust" name="top_3_news_trust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
                         </div>
 
                     </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <div>
+                            <button onclick="resetNewsSourceRank()" class="btn btn-secondary mr-2">Reset</button>
+                            <button onclick="handleTrustInNewsNext()" class="btn btn-primary">Next</button>
+                        </div>
+                    </div>
                 `
             },
            {
@@ -860,7 +877,10 @@
                     </div>
                     <div class="flex justify-between mt-8">
                          <button style="visibility:hidden" class="btn btn-secondary">Back</button>
-                        <button onclick="startGOTTrial()" class="btn btn-primary">Start Task</button>
+                         <div> <!-- Added a div to group buttons -->
+                            <button onclick="skipGOTTask()" class="btn btn-secondary mr-2">Skip</button> <!-- Added Skip button -->
+                            <button onclick="startGOTTrial()" class="btn btn-primary">Start Task</button>
+                         </div>
                     </div>
                     
                 `
@@ -893,10 +913,12 @@
                     ];
 
                     // Shuffle the questions array (Fisher-Yates shuffle)
+                    /* REMOVED SHUFFLE
                     for (let i = crtQuestions.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [crtQuestions[i], crtQuestions[j]] = [crtQuestions[j], crtQuestions[i]];
                     }
+                    */
 
                     const questionsHTML = crtQuestions.map(q => `
                         <div>
@@ -945,10 +967,10 @@
                 getHTML: () => {
                     const options = [
                         // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
-                        { id: 'ss_humans', value: 'Human-only', text: 'Receive advice from six different humans.', description: 'You will receive advice from six different humans.' },
-                        { id: 'ss_llms', value: 'LLM-only', text: 'Receive advice from six different AI chat bots (like ChatGPT or Gemini).', description: 'You receive advice from six different AI chat bots (like ChatGPT or Gemini).' },
-                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Receive advice from three different humans and three different AI chat bots.', description: 'You will receive advice from three different humans and three different AI chat bots.' },
-                        { id: 'ss_none', value: 'Control', text: 'No advice.', description: 'You will not receive any advice.' }
+                        { id: 'ss_humans', value: 'Human-only', text: 'Advice from 6 different humans.', description: '6 human adults that were recruited online and observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
+                        { id: 'ss_llms', value: 'LLM-only', text: 'Advice from 6 different AI chat bots.', description: '6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
+                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Advice from 3 different humans and 3 different AI chat bots.', description: '3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
+                        { id: 'ss_none', value: 'Control', text: 'No advice.', description: 'You will receive no advice when making your judgments.' }
                     ];
 
                     // Shuffle the options array (Fisher-Yates shuffle)
@@ -961,7 +983,7 @@
                         <div>
                             <input type="radio" id="${opt.id}" name="self_select" value="${opt.value}" class="hidden">
                             <label for="${opt.id}" class="option-label">
-                                <b>${opt.text}</b>
+                                <b>${opt.text}</b> ${opt.description}
                             </label>
                         </div>
                     `).join('');
@@ -990,7 +1012,7 @@
                         case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization with each headline. A red icon indicates that the fact-checker deemed this headline to be inaccurate. A green icon indicates an accurate judgment (meaning the headline comes from a credible source).</p>`; break;
                         case 'Human-only': info = `<p class="mb-4">For each headline, you will see how each of the six human raters judged its accuracy. A red icon indicates the headline was judged as inaccurate, and a green icon indicates the headline was judged as accurate.</p>`; break;
                         case 'LLM-only': info = `<p class="mb-4">For each headline, you will see how each of the six AI chat bots judged its accuracy. An icon presented in green will indicate that the headline was judged as accurate, whereas an icon in red will indicate that the headline was judged as inaccurate.</p>`; break;
-                        case 'Hybrid': info = `<p class="mb-4">For each headline, you will see how three different humans and three different AI chatbots  judged its accuracy. A red icon indicates the headline was judged as inaccurate (either by a human or an AI), a green icon indicates the headline was judged as accurate.</p>`; break;
+                        case 'Hybrid': info = `<p class="mb-4">For each headline, you will see how three different humans and three different AI chat bots  judged its accuracy. A red icon indicates the headline was judged as inaccurate (either by a human or an AI), a green icon indicates the headline was judged as accurate.</p>`; break;
                     }
                     const exampleHTML = getAdviceExampleHTML(adviceCondition);
                     return `
@@ -1210,7 +1232,7 @@
                     break;
                 case 'Hybrid':
                     exampleTitle = `Here is an example of what the advice will look like:`;
-                    exampleText = `2 out of 3 human raters judged the headline as <strong>Accurate</strong>; 3 out of 3 AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                    exampleText = `5 out of 6 human raters and AI chat bots judged the headline as <strong>Accurate</strong>.`;
                     exampleIconsHTML = `<img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.red}" class="advice-icon">` +
                                        `<img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon">`;
                     break;
@@ -1271,6 +1293,9 @@
                 case 'Hybrid':
                     const hybridRatings = ratings.hybrid; 
                     
+                    // Count total accurate ratings
+                    const totalAccurateCount = hybridRatings.filter(r => r.rating).length;
+
                     // Count human accurate ratings
                     const humanRatingss = hybridRatings.filter(r => r.type === 'human');
                     const humanAccurateCounts = humanRatingss.filter(r => r.rating).length;
@@ -1279,7 +1304,7 @@
                     const llmRatingss = hybridRatings.filter(r => r.type === 'robot');
                     const llmAccurateCounts = llmRatingss.filter(r => r.rating).length;
 
-                    adviceTitle = `${humanAccurateCounts} out of 3 humans rated the headline as <strong>Accurate</strong>; ${llmAccurateCounts} out of 3 AI chat bots rated the headline as <strong>Accurate</strong>.`;
+                    adviceTitle = `${totalAccurateCount} out of 6 human raters and AI chat bots rated the headline as <strong>Accurate</strong>.`;
                     
                     iconsHTML = [...hybridRatings].sort((a, b) => {
                         // Primary sort: by type (human then robot)
@@ -1307,9 +1332,10 @@
         }
 
         function renderHeadlineStep() {
-            const totalQuestions = allHeadlines.length * 3; // Changed from 2 to 3
-            const questionsCompleted = currentHeadlineIndex * 3 + currentQuestionInLoop; // Changed from 2 to 3
-            const progress = (questionsCompleted / totalQuestions) * 100;
+            const totalQuestions = allHeadlines.length * 2; // Changed from 3 to 2
+            const questionsCompleted = currentHeadlineIndex * 2 + currentQuestionInLoop; // Changed from 3 to 2
+            
+            const progress = (questionsCompleted / totalQuestions) * 100; // <--- ADDED THIS LINE
             
             document.getElementById('progress-container').classList.remove('hidden');
             document.getElementById('progress-text').classList.remove('hidden');
@@ -1332,7 +1358,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                ${['Accurate,<br>very<br>confident', 'Accurate,<br>moderately<br>confident', 'Accurate,<br>slightly<br>confident', 'Accurate,<br>not at all<br>confident', 'Inaccurate,<br>not at all<br>confident', 'Inaccurate,<br>slightly<br>confident', 'Inaccurate,<br>moderately<br>confident', 'Inaccurate,<br>very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                                ${["Very confident<br>it's accurate", "Moderately confident<br>it's accurate", "Somewhat confident<br>it's accurate", "Somewhat confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Very confident<br>it's inaccurate"].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -1387,11 +1413,11 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                            ${['Accurate,<br>very<br>confident', 'Accurate,<br>moderately<br>confident', 'Accurate,<br>slightly<br>confident', 'Accurate,<br>not at all<br>confident', 'Inaccurate,<br>not at all<br>confident', 'Inaccurate,<br>slightly<br>confident', 'Inaccurate,<br>moderately<br>confident', 'Inaccurate,<br>very<br>confident'].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            ${["Very confident<br>it's accurate", "Moderately confident<br>it's accurate", "Somewhat confident<br>it's accurate", "Somewhat confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Very confident<br>it's inaccurate"].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
-                case 2: // Familiarity (was case 1)
+                case 1: // Familiarity (CHANGED from case 2)
                      questionHTML = `
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
@@ -1423,6 +1449,26 @@
         }
         
         // --- GOT Task Logic ---
+        function skipGOTTask() {
+            // Find the index of the 'crt' step, which comes after the GOT tasks
+            const crtStepIndex = surveySteps.findIndex(step => step.id === 'crt');
+            
+            if (crtStepIndex !== -1) {
+                currentStep = crtStepIndex;
+                renderStep();
+            } else {
+                // Fallback in case 'crt' ID changes: find 'got_confidence_est' and go after it
+                const confidenceStepIndex = surveySteps.findIndex(step => step.id === 'got_confidence_est');
+                if (confidenceStepIndex !== -1) {
+                    currentStep = confidenceStepIndex + 1;
+                    renderStep();
+                } else {
+                    console.error("Could not find next step to skip to. Defaulting to nextStep().");
+                    nextStep(); // Simple fallback
+                }
+            }
+        }
+
         function startGOTTrial() {
             // Set currentStep to the GOT task step index
             currentStep = surveySteps.findIndex(step => step.id === 'got_task');
@@ -1584,6 +1630,8 @@
             selfSelectChoice = '';
             surveyData = { answers: {} };
             newsSourceOrder = [];
+            advisorRankings = [];
+            newsSourceRankings = [];
 
             // Reset UI elements
             document.getElementById('progress-container').classList.add('hidden');
@@ -1692,13 +1740,68 @@
         function handleAdvisorPreferenceNext() {
             const errorDiv = document.getElementById('advisor-rank-error');
             // Ensure all 3 options are ranked before proceeding
-            if (advisorRankings.length === 3) {
+            // if (advisorRankings.length === 3) { // Removed for testing
                 surveyData.advisorPreferenceRank = [...advisorRankings]; // Save a copy
                 if (errorDiv) errorDiv.classList.add('hidden');
                 nextStep();
-            } else {
-                if (errorDiv) errorDiv.classList.remove('hidden');
+            // } else {
+            //     if (errorDiv) errorDiv.classList.remove('hidden');
+            // }
+        }
+
+        function handleNewsSourceRank(element, value) {
+            const numOptions = 3; // CHANGED from 6
+            // Only add if it's not already ranked and we haven't ranked all options
+            if (!newsSourceRankings.includes(value) && newsSourceRankings.length < numOptions) {
+                newsSourceRankings.push(value);
+                updateNewsSourceRankUI();
             }
+        }
+
+        function updateNewsSourceRankUI() {
+            const options = document.querySelectorAll('#news-source-options .option-rank-button');
+            options.forEach(option => {
+                const value = option.dataset.value;
+                const rankIndex = newsSourceRankings.indexOf(value);
+                
+                // Clear existing rank badge
+                const existingBadge = option.querySelector('.rank-badge');
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+                
+                if (rankIndex !== -1) {
+                    // Item is ranked
+                    option.classList.add('selected-rank');
+                    const badge = document.createElement('span');
+                    badge.className = 'rank-badge';
+                    badge.textContent = `(${rankIndex + 1})`;
+                    option.appendChild(badge);
+                } else {
+                    // Item is not ranked
+                    option.classList.remove('selected-rank');
+                }
+            });
+        }
+
+        function resetNewsSourceRank() {
+            newsSourceRankings = [];
+            updateNewsSourceRankUI();
+            const errorDiv = document.getElementById('news-source-rank-error');
+            if (errorDiv) {
+                errorDiv.textContent = "Please rank your top three options to continue."; // Ensure text is correct
+                errorDiv.classList.add('hidden');
+            }
+        }
+
+        function handleTrustInNewsNext() {
+            const errorDiv = document.getElementById('news-source-rank-error');
+            if (errorDiv) errorDiv.classList.add('hidden'); // Always hide error
+
+            // Save whatever rankings exist, even if incomplete
+            surveyData.newsSourcePreferenceRank = [...newsSourceRankings]; 
+            
+            nextStep(); // Proceed regardless of how many are ranked
         }
 
         function handleAdvisorPreference() {
@@ -1759,7 +1862,7 @@
                 surveyData.practice[input.name] = input.value;
             }
             currentPracticeQuestion++;
-            if (currentPracticeQuestion >= 3) { // Changed from 2 to 3
+            if (currentPracticeQuestion >= 2) { // Changed from 3 to 2
                 currentStep++;
                 renderStep();
             } else {
@@ -1779,7 +1882,7 @@
         function nextHeadline() {
             saveData(`headlineLoop-q${currentQuestionInLoop}`);
             currentQuestionInLoop++;
-            if (currentQuestionInLoop >= 3) { // Changed from 2 to 3
+            if (currentQuestionInLoop >= 2) { // Changed from 3 to 2
                 currentHeadlineIndex++;
                 currentQuestionInLoop = 0;
             }
@@ -1807,7 +1910,7 @@
             if (currentQuestionInLoop < 0) {
                 if (currentHeadlineIndex > 0) {
                     currentHeadlineIndex--;
-                    currentQuestionInLoop = 2; // Go to the last question of the previous headline (was 1)
+                    currentQuestionInLoop = 1; // Go to the last question of the previous headline (was 2)
                 } else {
                     currentQuestionInLoop = 0; // Stay on the first question of the first headline
                 }
@@ -1836,10 +1939,10 @@
                     // Special handling if we're moving back to the headline loop
                     if (stepData.id === 'headlineLoop') {
                         currentHeadlineIndex = allHeadlines.length - 1;
-                        currentQuestionInLoop = 2; // (was 1)
+                        currentQuestionInLoop = 1; // (was 2)
                     }
                     if (stepData.id === 'practice_round') {
-                        currentPracticeQuestion = 2; // (was 1)
+                        currentPracticeQuestion = 1; // (was 2)
                     }
                     
                     renderStep();
@@ -1946,13 +2049,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
 
 
 
