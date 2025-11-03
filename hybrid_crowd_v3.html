@@ -130,7 +130,7 @@
             background-color: #f3f4f6;
             border: 1px solid #d1d5db;
             border-radius: 8px;
-            text-align: center;
+            /* text-align: center; */ /* Removed for flex alignment */
         }
         .btn-test {
             padding: 0.5rem 0.75rem;
@@ -276,14 +276,25 @@
 
     <div id="image-preloader"></div>
 
-    <div id="test-menu">
-        <span class="font-bold mr-2 text-sm text-gray-700">CO-AUTHORS-ONLY TEST MENU:</span>
-        <button data-condition="Control" class="btn-test">Control</button>
-        <button data-condition="Fact-checker" class="btn-test">Fact-checker</button>
-        <button data-condition="Human-only" class="btn-test">Human Crowd</button>
-        <button data-condition="LLM-only" class="btn-test">LLM Crowd</button>
-        <button data-condition="Hybrid" class="btn-test">Hybrid</button>
-        <button data-condition="Self-select" class="btn-test">Self-select</button>
+    <div id="test-menu" class="flex flex-col items-center space-y-2"> <!-- Modified this line -->
+        <div> <!-- Group 1: Main Conditions -->
+            <span class="font-bold mr-2 text-sm text-gray-700">NO-FEEDBACK TEST MENU:</span>
+            <button data-condition="Control" class="btn-test">Control</button>
+            <button data-condition="Fact-checker" class="btn-test">Fact-checker</button>
+            <button data-condition="Human-only" class="btn-test">Human Crowd</button>
+            <button data-condition="LLM-only" class="btn-test">LLM Crowd</button>
+            <button data-condition="Hybrid" class="btn-test">Hybrid</button>
+            <button data-condition="Self-select" class="btn-test">Self-select</button>
+        </div>
+        <div> <!-- Group 2: Feedback Condition -->
+             <span class="font-bold mr-2 text-sm text-gray-700">FEEDBACK TEST MENU:</span>
+            <button data-condition="Control (Feedback)" class="btn-test">Control</button>
+            <button data-condition="Fact-checker (Feedback)" class="btn-test">Fact-checker</button>
+            <button data-condition="Human-only (Feedback)" class="btn-test">Human Crowd</button>
+            <button data-condition="LLM-only (Feedback)" class="btn-test">LLM Crowd</button>
+            <button data-condition="Hybrid (Feedback)" class="btn-test">Hybrid</button>
+            <button data-condition="Self-select (Feedback)" class="btn-test">Self-select</button> <!-- ADDED -->
+        </div>
     </div>
 
     <div class="survey-container">
@@ -438,7 +449,7 @@
         let advisorRankings = []; // To store advisor preference ranks
         let newsSourceRankings = []; // To store news source preference ranks
 
-        const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'];
+        const CONDITIONS = ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select', 'Control (Feedback)', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)', 'Self-select (Feedback)']; // ADDED
         let userCondition = '';
         let selfSelectChoice = ''; 
 
@@ -492,7 +503,7 @@
             },       
              {
                 id: 'advisorPreference',
-                condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select'].includes(c),
+                condition: (c) => ['Control', 'Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Self-select', 'Control (Feedback)', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)', 'Self-select (Feedback)'].includes(c), // ADDED
                 getHTML: () => {
                     const options = [
                         { id: 'pref_humans', value: 'Human-only', text: '<strong>A group of humans</strong>: Human adults that observed the same news and independently judged whether they thought that the news was accurate or inaccurate.' },
@@ -963,7 +974,7 @@
             },
             {
                 id: 'selfSelectAdvisor',
-                condition: (c) => c === 'Self-select',
+                condition: (c) => c === 'Self-select' || c === 'Self-select (Feedback)', // UPDATED
                 getHTML: () => {
                     const options = [
                         // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
@@ -1004,9 +1015,22 @@
             },
             {
                 id: 'conditionInfo',
-                condition: (c) => ['Fact-checker', 'Human-only', 'LLM-only', 'Hybrid'].includes(selfSelectChoice || c),
+                condition: (c) => ['Fact-checker', 'Human-only', 'LLM-only', 'Hybrid', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)'].includes(selfSelectChoice || c), // ADDED
                 getHTML: () => {
-                    const adviceCondition = selfSelectChoice || userCondition;
+                    let adviceCondition = selfSelectChoice || userCondition;
+                    // ADDED: Remap 'Fact-checker (Feedback)' to 'Fact-checker' for content lookup
+                    if (adviceCondition === 'Fact-checker (Feedback)') {
+                        adviceCondition = 'Fact-checker';
+                    }
+                    if (adviceCondition === 'Human-only (Feedback)') { // ADDED
+                        adviceCondition = 'Human-only';
+                    }
+                    if (adviceCondition === 'LLM-only (Feedback)') { // ADDED
+                        adviceCondition = 'LLM-only';
+                    }
+                    if (adviceCondition === 'Hybrid (Feedback)') { // ADDED
+                        adviceCondition = 'Hybrid';
+                    }
                     let info = '';
                     switch(adviceCondition) {
                         case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization with each headline. A red icon indicates that the fact-checker deemed this headline to be inaccurate. A green icon indicates an accurate judgment (meaning the headline comes from a credible source).</p>`; break;
@@ -1028,13 +1052,46 @@
                     `;
                 }
             },            
+            // FEEDBACK
+            {
+                id: 'feedback_instructions',
+                condition: (c) => ['Control (Feedback)', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)', 'Self-select (Feedback)'].includes(userCondition), // UPDATED
+                getHTML: () => {
+                    // Check if this is a "Control" feedback condition (either directly or via self-select)
+                    let isControlFeedback = false;
+                    if (userCondition === 'Control (Feedback)') {
+                        isControlFeedback = true;
+                    } else if (userCondition === 'Self-select (Feedback)' && selfSelectChoice === 'Control') {
+                        isControlFeedback = true;
+                    }
+
+                    let explanationText = '';
+                    if (isControlFeedback) {
+                        explanationText = 'Alongside, you will also see your own response, this way you can determine whether your response was correct or incorrect.';
+                    } else {
+                        explanationText = 'Alongside, you will also see your own response and the responses of your advisors, this way you can determine whether your response, and that of your advisors, was correct or incorrect.';
+                    }
+
+                    return `
+                        <div class="text-left">
+                            <h1 class="text-2xl font-bold mb-4">Feedback</h1>
+                            <p class="text-gray-600 mb-6">After each trial, you will also see whether the news headline was accurate or inaccurate.<br><br> A headline that was flagged as inaccurate by an independent fact-checking organization will be indicated by the word "Inaccurate". If the headline comes from a credible source, this will be indicated by the word "Accurate".</p>
+                            <p class="text-gray-600 mb-6">${explanationText}</p>
+                            <div class="flex justify-between mt-8">
+                                <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                                <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            },            
             // PART 3: HEADLINE TASK
             {
                 id: 'final_instructions',
                 getHTML: () => `
                     <div class="text-center">
                         <h1 class="text-2xl font-bold mb-4">All Set!</h1>
-                        <p class="text-gray-600 mb-6">The practice round is over. You will now see 32 news headlines. Please try your best to evaluate them.</p>
+                        <p class="text-gray-600 mb-6">You will now see 32 news headlines. Please try your best to evaluate them.</p>
                         <div class="flex justify-center">
                             <button onclick="nextStep()" class="btn btn-primary">Start</button>
                         </div>
@@ -1088,7 +1145,7 @@
             },
                         {
                 id: 'selfSelect_noAdvisor_reason',
-                condition: (c) => c === 'Self-select' && selfSelectChoice === 'Control',
+                condition: (c) => (c === 'Self-select' || c === 'Self-select (Feedback)') && selfSelectChoice === 'Control',
                 html: `
                     <div class="space-y-4">
                         <label class="block font-medium mb-3 text-center" for="no_advisor_reason">Why did you choose the 'No advisor' condition?</label>
@@ -1262,6 +1319,7 @@
             let iconsHTML = '';
 
             switch (condition) {
+                case 'Fact-checker (Feedback)': // ADDED
                 case 'Fact-checker':
                     if (isTrueHeadline) {
                         adviceTitle = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
@@ -1272,6 +1330,7 @@
                     iconsHTML = `<img src="${iconSrc}" alt="Fact-check rating" class="advice-icon">`;
                     break;
                 
+                case 'Human-only (Feedback)': // ADDED
                 case 'Human-only':
                     const humanRatings = ratings.human; // Use stored ratings
                     const humanAccurateCount = humanRatings.filter(r => r).length;
@@ -1281,15 +1340,7 @@
                     ).join('');
                     break;
 
-                case 'LLM-only':
-                    const llmRatings = ratings.llm; // Use stored ratings
-                    const llmAccurateCount = llmRatings.filter(r => r).length;
-                    adviceTitle = `${llmAccurateCount} out of 6 AI chat bots rated the headline as <strong>Accurate</strong>.`;
-                    iconsHTML = [...llmRatings].sort((a, b) => b - a).map(rating => 
-                        `<img src="${rating ? ICONS.robot.green : ICONS.robot.red}" alt="AI rating" class="advice-icon">`
-                    ).join('');
-                    break;
-
+                case 'Hybrid (Feedback)': // ADDED
                 case 'Hybrid':
                     const hybridRatings = ratings.hybrid; 
                     
@@ -1882,10 +1933,134 @@
         function nextHeadline() {
             saveData(`headlineLoop-q${currentQuestionInLoop}`);
             currentQuestionInLoop++;
+            
             if (currentQuestionInLoop >= 2) { // Changed from 3 to 2
-                currentHeadlineIndex++;
-                currentQuestionInLoop = 0;
+                // This was the last question for this headline.
+                // Check if we should show feedback.
+                // UPDATED: This check now *only* looks at the base userCondition
+                const isFeedback = ['Control (Feedback)', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)', 'Self-select (Feedback)'].includes(userCondition);
+                
+                if (isFeedback) {
+                    renderFeedbackScreen();
+                } else {
+                    proceedToNextHeadline();
+                }
+            } else {
+                // This was not the last question, render the next one.
+                renderHeadlineStep();
             }
+        }
+
+        /**
+         * Renders the feedback screen after a trial.
+         */
+        function renderFeedbackScreen() {
+            const headline = allHeadlines[currentHeadlineIndex];
+            const answer = surveyData.answers[currentHeadlineIndex];
+            
+            // This is the mapping logic for Self-select (Feedback)
+            let conditionForFeedback = selfSelectChoice || userCondition;
+            if (userCondition === 'Self-select (Feedback)') {
+                if (conditionForFeedback === 'Control') conditionForFeedback = 'Control (Feedback)';
+                if (conditionForFeedback === 'Fact-checker') conditionForFeedback = 'Fact-checker (Feedback)';
+                if (conditionForFeedback === 'Human-only') conditionForFeedback = 'Human-only (Feedback)';
+                if (conditionForFeedback === 'LLM-only') conditionForFeedback = 'LLM-only (Feedback)';
+                if (conditionForFeedback === 'Hybrid') conditionForFeedback = 'Hybrid (Feedback)';
+            }
+            // ---
+
+            if (!headline || !answer) {
+                console.error("Missing data for feedback screen");
+                proceedToNextHeadline(); // Skip if data is bad
+                return;
+            }
+
+            // 1. Get headline's true status
+            const isTrue = headline.isTrue;
+            const trueStatusText = isTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
+
+            // 2. Get user's response
+            const userConfidenceAnswer = answer.confidence;
+            const userSaidTrue = ["Very confident it's accurate", "Moderately confident it's accurate", "Somewhat confident it's accurate"].includes(userConfidenceAnswer);
+            const userResponseText = userSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
+            const userWasCorrect = (isTrue && userSaidTrue) || (!isTrue && !userSaidTrue);
+            const userIcon = userWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
+
+            // 3. Get advisor's response (if applicable)
+            let advisorHTML = '';
+            if (conditionForFeedback === 'Fact-checker (Feedback)') {
+                // In our setup, the fact-checker's advice matches the headline's true status
+                const advisorSaidTrue = isTrue; 
+                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
+                // The advisor is always "correct" by definition here
+                const advisorIcon = '<span class="text-green-600 text-4xl ml-2">✅</span>'; 
+                
+                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
+            
+            } else if (conditionForFeedback === 'Human-only (Feedback)') { // ADDED THIS BLOCK
+                const ratings = headlineAdviceRatings[currentHeadlineIndex].human;
+                const humanAccurateCount = ratings.filter(r => r).length;
+                
+                // Binarize: Majority rule (3 or more) means "ACCURATE"
+                const advisorSaidTrue = humanAccurateCount >= 3; 
+                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
+                
+                // Check if the crowd's majority opinion was correct
+                const advisorWasCorrect = (isTrue && advisorSaidTrue) || (!isTrue && !advisorSaidTrue);
+                const advisorIcon = advisorWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
+
+                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
+            
+            } else if (conditionForFeedback === 'LLM-only (Feedback)') { // ADDED THIS BLOCK (was missing)
+                const ratings = headlineAdviceRatings[currentHeadlineIndex].llm;
+                const llmAccurateCount = ratings.filter(r => r).length;
+                
+                // Binarize: Majority rule (3 or more) means "ACCURATE"
+                const advisorSaidTrue = llmAccurateCount >= 3; 
+                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
+                
+                // Check if the crowd's majority opinion was correct
+                const advisorWasCorrect = (isTrue && advisorSaidTrue) || (!isTrue && !advisorSaidTrue);
+                const advisorIcon = advisorWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
+
+                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
+            
+            } else if (conditionForFeedback === 'Hybrid (Feedback)') { // ADDED THIS BLOCK
+                const ratings = headlineAdviceRatings[currentHeadlineIndex].hybrid;
+                const hybridAccurateCount = ratings.filter(r => r.rating).length;
+                
+                // Binarize: Majority rule (3 or more) means "ACCURATE"
+                const advisorSaidTrue = hybridAccurateCount >= 3; 
+                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
+                
+                // Check if the crowd's majority opinion was correct
+                const advisorWasCorrect = (isTrue && advisorSaidTrue) || (!isTrue && !advisorSaidTrue);
+                const advisorIcon = advisorWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
+
+                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
+            }
+
+            app.innerHTML = `
+                <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
+                    <div class="space-y-8">
+                        <p class="text-2xl text-gray-700">The previous news headline was:&nbsp; ${trueStatusText}</p>
+                        ${advisorHTML} <!-- This will be empty for 'Control (Feedback)' -->
+                        <p class="text-2xl text-gray-700 flex items-center justify-center">You selected:&nbsp; ${userResponseText}&nbsp;(${userIcon})</p>
+                    </div>
+                    <div class="mt-12">
+                        <button onclick="proceedToNextHeadline()" class="btn btn-primary">Next</Lbutton>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Moves to the next headline or ends the loop.
+         */
+        function proceedToNextHeadline() {
+            currentHeadlineIndex++;
+            currentQuestionInLoop = 0;
+            
             if (currentHeadlineIndex >= allHeadlines.length) {
                 currentStep++;
                 renderStep();
@@ -2049,6 +2224,17 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
