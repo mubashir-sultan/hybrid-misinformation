@@ -232,6 +232,16 @@
             visibility: visible;
             opacity: 1;
         }
+    
+        /* NEW STYLE for highlighting the user's answer on the feedback screen */
+        .highlight-user-answer {
+            border: 3px solid #1f2937 !important; /* Tailwind gray-800 */
+            background-color: #dbeafe !important; /* Tailwind blue-100 */
+            color: #1e40af !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
      /* Custom Slider Styles */
 #political_scale_slider {
     -webkit-appearance: none;
@@ -1939,7 +1949,34 @@
                 const isFeedback = ['Control (Feedback)', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)', 'Self-select (Feedback)'].includes(userCondition);
                 
                 if (isFeedback) {
-                    renderFeedbackScreen();
+                    // NEW LOGIC: Always call the inline feedback renderer
+                    renderInlineFeedbackScreen(); 
+                    
+                    /* OLD LOGIC TO BE REMOVED
+                    // NEW LOGIC STARTS HERE
+                    
+                    // Determine the actual condition being applied
+                    let conditionForFeedback = selfSelectChoice || userCondition;
+                    if (userCondition === 'Self-select (Feedback)') {
+                        if (conditionForFeedback === 'Control') conditionForFeedback = 'Control (Feedback)';
+                        if (conditionForFeedback === 'Fact-checker') conditionForFeedback = 'Fact-checker (Feedback)';
+                        if (conditionForFeedback === 'Human-only') conditionForFeedback = 'Human-only (Feedback)';
+                        if (conditionForFeedback === 'LLM-only') conditionForFeedback = 'LLM-only (Feedback)';
+                        if (conditionForFeedback === 'Hybrid') conditionForFeedback = 'Hybrid (Feedback)';
+                    }
+                    
+                    // Check if this is a "No Advice" (Control) feedback condition
+                    const isControlFeedback = conditionForFeedback === 'Control (Feedback)';
+
+                    if (isControlFeedback) {
+                        // Call the new "inline" feedback renderer
+                        renderControlFeedbackScreen();
+                    } else {
+                        // Call the original "summary screen" feedback renderer for advice conditions
+                        renderFeedbackScreen();
+                    }
+                    // NEW LOGIC ENDS HERE
+                    */
                 } else {
                     proceedToNextHeadline();
                 }
@@ -1952,102 +1989,119 @@
         /**
          * Renders the feedback screen after a trial.
          */
-        function renderFeedbackScreen() {
-            const headline = allHeadlines[currentHeadlineIndex];
-            const answer = surveyData.answers[currentHeadlineIndex];
+        /* function renderFeedbackScreen() {
+            // ... THIS ENTIRE FUNCTION IS NOW REMOVED ...
+        }
+        */
+
+        /**
+         * Renders the feedback "inline" by re-showing the veracity question
+         * with the user's answer highlighted and the true answer overlaid on the image.
+         * This is used for ALL feedback conditions.
+         */
+        function renderInlineFeedbackScreen() {
+            // Hide progress bar during feedback
+            // document.getElementById('progress-container').classList.add('hidden'); // REMOVED
+            // document.getElementById('progress-text').classList.add('hidden'); // REMOVED
+
+            const headlineObj = allHeadlines[currentHeadlineIndex];
+            const adviceHTML = getAdviceHTML(currentHeadlineIndex); // Will be empty for Control
+            const userAnswer = surveyData.answers[currentHeadlineIndex]?.confidence;
+            const isTrue = headlineObj.isTrue;
+
+            // 1. Build the overlay
+            const trueStatusText = isTrue ? 'ACCURATE' : 'INACCURATE';
+            // Use bright colors to stand out on the dark overlay
+            const overlayColorClass = isTrue ? 'text-green-400' : 'text-red-400'; 
             
-            // This is the mapping logic for Self-select (Feedback)
-            let conditionForFeedback = selfSelectChoice || userCondition;
-            if (userCondition === 'Self-select (Feedback)') {
-                if (conditionForFeedback === 'Control') conditionForFeedback = 'Control (Feedback)';
-                if (conditionForFeedback === 'Fact-checker') conditionForFeedback = 'Fact-checker (Feedback)';
-                if (conditionForFeedback === 'Human-only') conditionForFeedback = 'Human-only (Feedback)';
-                if (conditionForFeedback === 'LLM-only') conditionForFeedback = 'LLM-only (Feedback)';
-                if (conditionForFeedback === 'Hybrid') conditionForFeedback = 'Hybrid (Feedback)';
+            let userJudgmentText = ''; // This will hold the CORRECT/INCORRECT text
+            let headlineStatusText = ''; // This will hold the ACCURATE/INACCURATE text
+
+            // Check for attention check first
+            if (headlineObj.text === "Attention check") {
+                userJudgmentText = 'This headline is an attention check.';
+            } else {
+                // It's not an attention check.
+                
+                // 1. Determine if the user was correct
+                if (userAnswer) {
+                    const userThinksInaccurate = userAnswer.includes('inaccurate'); // CHANGED THIS LINE
+                    const userWasCorrect = (isTrue === !userThinksInaccurate); // CHANGED THIS LINE
+
+                    if (userWasCorrect) {
+                        userJudgmentText = `<span class="text-green-400">Your judgment was CORRECT.</span>`;
+                    } else {
+                        userJudgmentText = `<span class="text-red-400">Your judgment was INCORRECT.</span>`;
+                    }
+                }
+
+                // 2. Determine headline status
+                headlineStatusText = `This headline is <span class="${overlayColorClass}">${trueStatusText}</span>.`;
             }
-            // ---
+            
+            const overlayHTML = `
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 8px;">
+                    <h2 class="text-white text-3xl font-bold" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+                        ${userJudgmentText}
+                        ${headlineStatusText ? `<br><br>${headlineStatusText}` : ''}
+                    </h2>
+                </div>
+            `;
+            
+            // 2. Build the headline stimulus with overlay
+            const headlineStimulusHTML = `
+                <div class="mb-4 flex flex-col items-center justify-center" style="position: relative;">
+                    <img src="${headlineObj.img}" alt="News Stimulus" class="max-w-full max-h-96 rounded shadow-md" />
+                    ${overlayHTML}
+                </div>
+            `;
 
-            if (!headline || !answer) {
-                console.error("Missing data for feedback screen");
-                proceedToNextHeadline(); // Skip if data is bad
-                return;
+            // 3. Build the veracity question, highlighting the user's answer
+            const options = ["Very confident<br>it's accurate", "Moderately confident<br>it's accurate", "Somewhat confident<br>it's accurate", "Somewhat confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Very confident<br>it's inaccurate"];
+            
+            // NEW: Determine if user was correct and create feedback message
+            /* THIS BLOCK IS NO LONGER NEEDED HERE
+            let feedbackMessageHTML = '';
+            // Only show correct/incorrect if it's not the attention check
+            if (headlineObj.text !== "Attention check" && userAnswer) {
+                const userThinksAccurate = userAnswer.includes('accurate');
+                const userWasCorrect = (userThinksAccurate === isTrue);
+
+                if (userWasCorrect) {
+                    feedbackMessageHTML = `<p class="text-xl text-center font-medium text-green-600 mt-6 mb-2">Your judgment was CORRECT.</p>`;
+                } else {
+                    feedbackMessageHTML = `<p class="text-xl text-center font-medium text-red-600 mt-6 mb-2">Your judgment was INCORRECT.</p>`;
+                }
             }
-
-            // 1. Get headline's true status
-            const isTrue = headline.isTrue;
-            const trueStatusText = isTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
-
-            // 2. Get user's response
-            const userConfidenceAnswer = answer.confidence;
-            const userSaidTrue = ["Very confident it's accurate", "Moderately confident it's accurate", "Somewhat confident it's accurate"].includes(userConfidenceAnswer);
-            const userResponseText = userSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
-            const userWasCorrect = (isTrue && userSaidTrue) || (!isTrue && !userSaidTrue);
-            const userIcon = userWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
-
-            // 3. Get advisor's response (if applicable)
-            let advisorHTML = '';
-            if (conditionForFeedback === 'Fact-checker (Feedback)') {
-                // In our setup, the fact-checker's advice matches the headline's true status
-                const advisorSaidTrue = isTrue; 
-                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
-                // The advisor is always "correct" by definition here
-                const advisorIcon = '<span class="text-green-600 text-4xl ml-2">✅</span>'; 
-                
-                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
+            */
             
-            } else if (conditionForFeedback === 'Human-only (Feedback)') { // ADDED THIS BLOCK
-                const ratings = headlineAdviceRatings[currentHeadlineIndex].human;
-                const humanAccurateCount = ratings.filter(r => r).length;
-                
-                // Binarize: Majority rule (3 or more) means "ACCURATE"
-                const advisorSaidTrue = humanAccurateCount >= 3; 
-                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
-                
-                // Check if the crowd's majority opinion was correct
-                const advisorWasCorrect = (isTrue && advisorSaidTrue) || (!isTrue && !advisorSaidTrue);
-                const advisorIcon = advisorWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
+            const questionHTML = `
+                <div>
+                    <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
+                    <div class="option-grid">
+                        ${options.map((o,i) => {
+                            const val = o.replace('<br>', ' ');
+                            const isUserAnswer = val === userAnswer;
+                            // Apply the new highlight class if this was the user's answer
+                            const highlightClass = isUserAnswer ? 'highlight-user-answer' : '';
+                            
+                            return `<div>
+                                        <input type="radio" name="confidence" value="${val}" id="conf_${i}" class="hidden" disabled ${isUserAnswer ? 'checked' : ''}>
+                                        <label class="option-button ${highlightClass}" for="conf_${i}" style="opacity: 0.9;">${o}</label>
+                                    </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
 
-                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
-            
-            } else if (conditionForFeedback === 'LLM-only (Feedback)') { // ADDED THIS BLOCK (was missing)
-                const ratings = headlineAdviceRatings[currentHeadlineIndex].llm;
-                const llmAccurateCount = ratings.filter(r => r).length;
-                
-                // Binarize: Majority rule (3 or more) means "ACCURATE"
-                const advisorSaidTrue = llmAccurateCount >= 3; 
-                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
-                
-                // Check if the crowd's majority opinion was correct
-                const advisorWasCorrect = (isTrue && advisorSaidTrue) || (!isTrue && !advisorSaidTrue);
-                const advisorIcon = advisorWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
-
-                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
-            
-            } else if (conditionForFeedback === 'Hybrid (Feedback)') { // ADDED THIS BLOCK
-                const ratings = headlineAdviceRatings[currentHeadlineIndex].hybrid;
-                const hybridAccurateCount = ratings.filter(r => r.rating).length;
-                
-                // Binarize: Majority rule (3 or more) means "ACCURATE"
-                const advisorSaidTrue = hybridAccurateCount >= 3; 
-                const advisorResponseText = advisorSaidTrue ? '<span class="text-green-600 font-bold">ACCURATE</span>' : '<span class="text-red-600 font-bold">INACCURATE</span>';
-                
-                // Check if the crowd's majority opinion was correct
-                const advisorWasCorrect = (isTrue && advisorSaidTrue) || (!isTrue && !advisorSaidTrue);
-                const advisorIcon = advisorWasCorrect ? '<span class="text-green-600 text-4xl ml-2">✅</span>' : '<span class="text-red-600 text-4xl ml-2">❌</span>';
-
-                advisorHTML = `<p class="text-2xl text-gray-700 flex items-center justify-center">Your advisors' suggested:&nbsp; ${advisorResponseText}&nbsp;(${advisorIcon})</p>`;
-            }
-
+            // 4. Render the final screen
             app.innerHTML = `
-                <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
-                    <div class="space-y-8">
-                        <p class="text-2xl text-gray-700">The previous news headline was:&nbsp; ${trueStatusText}</p>
-                        ${advisorHTML} <!-- This will be empty for 'Control (Feedback)' -->
-                        <p class="text-2xl text-gray-700 flex items-center justify-center">You selected:&nbsp; ${userResponseText}&nbsp;(${userIcon})</p>
-                    </div>
-                    <div class="mt-12">
-                        <button onclick="proceedToNextHeadline()" class="btn btn-primary">Next</Lbutton>
-                    </div>
+                ${adviceHTML}
+                ${headlineStimulusHTML}
+                <div class="space-y-8 mt-8">${questionHTML}</div>
+                
+                <div class="flex justify-between mt-8">
+                    <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                    <button onclick="proceedToNextHeadline()" class="btn btn-primary">Next</button>
                 </div>
             `;
         }
@@ -2222,6 +2276,16 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 
 
 
