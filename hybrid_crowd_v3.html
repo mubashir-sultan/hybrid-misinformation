@@ -1160,14 +1160,14 @@
                     if (practiceAnswer) {
                         if (userWasCorrect) {
                             userJudgmentText = `<span class="text-green-400">Your answer was CORRECT.</span>`;
-                            exampleExplanationText = "Here is an example of what feedback will look like. This headline is accurate and it was judged as accurate, hence, a correct response.";
+                            exampleExplanationText = "Here is an example of what feedback will look like: ";
                         } else {
                             userJudgmentText = `<span class="text-red-400">Your answer was INCORRECT.</span>`;
-                            exampleExplanationText = "Here is an example of what feedback will look like. This headline is accurate, but it was judged as inaccurate, hence, an incorrect response.";
+                            exampleExplanationText = "Here is an example of what feedback will look like: ";
                         }
                     } else {
                         userJudgmentText = `<span class="text-gray-400">Your answer will appear here.</span>`;
-                        exampleExplanationText = "Here is an example of what feedback will look like.";
+                        exampleExplanationText = "Here is an example of what feedback will look like: ";
                     }
                     // --- End of dynamic text logic ---
 
@@ -1410,7 +1410,7 @@
                         <img id="debunkImage" src="" alt="Debunked headline image" class="max-h-64 rounded-lg shadow" />
                         <div id="debunkExplanation" class="text-md text-gray-700 text-center pt-4"></div>
                     </div>
-                    <div classJ="flex justify-center items-center mt-8 w-full max-w-md mx-auto">
+                    <div class="flex justify-center items-center mt-8 w-full max-w-md mx-auto">
                         <button id="debunkNav" class="btn btn-primary">Next</button>
                     </div>
                 `
@@ -1503,11 +1503,32 @@
                 let adviceTitle = "This is an attention check.";
                 let iconsHTML = '';
                 
-                // Add 3 green and 3 red attention icons, ordered
-                const attentionRatings = ratings.attention; // Use pre-generated ratings
-                iconsHTML = attentionRatings.map(rating => 
-                    `<img src="${rating ? ICONS.attention_icon.green : ICONS.attention_icon.red}" alt="Attention icon" class="advice-icon">`
-                ).join('');
+                // --- NEW LOGIC for attention check icons ---
+                switch (condition) {
+                    case 'Fact-checker (Feedback)':
+                    case 'Fact-checker':
+                        // Show a single green A icon
+                        iconsHTML = `<img src="${ICONS.attention_icon.green}" alt="Attention icon" class="advice-icon">`;
+                        break;
+                    
+                    case 'Human-only (Feedback)':
+                    case 'Human-only':
+                    case 'LLM-only (Feedback)':
+                    case 'LLM-only':
+                    case 'Hybrid (Feedback)':
+                    case 'Hybrid':
+                        // Show 3 green, 3 red A icons
+                        const attentionRatings = ratings.attention; // Use pre-generated ratings
+                        iconsHTML = attentionRatings.map(rating => 
+                            `<img src="${rating ? ICONS.attention_icon.green : ICONS.attention_icon.red}" alt="Attention icon" class="advice-icon">`
+                        ).join('');
+                        break;
+                    
+                    default:
+                        // Default case (shouldn't be hit if control is filtered, but good to have)
+                        iconsHTML = '';
+                }
+                // --- END NEW LOGIC ---
 
 
                 return `
@@ -2487,4 +2508,6 @@
     </script>
 </body>
 </html>
+
+
 
