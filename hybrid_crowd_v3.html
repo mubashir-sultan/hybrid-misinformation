@@ -415,14 +415,18 @@
         let headlineAdviceRatings = [];
 
         function setupHeadlines() {
-             trueHeadlines = items.filter(item => !item.misinfo).map(item => ({
+            // Filter out the attention check from the main items
+            const mainItems = items.filter(item => item.text !== "Attention check");
+            const attentionCheckItem = items.find(item => item.text === "Attention check");
+
+             trueHeadlines = mainItems.filter(item => !item.misinfo).map(item => ({
                 img: item.image,
                 isTrue: true,
                 text: item.text,
                 debunk: item.debunk
             }));
 
-            falseHeadlines = items.filter(item => item.misinfo).map(item => ({
+            falseHeadlines = mainItems.filter(item => item.misinfo).map(item => ({
                 img: item.image,
                 isTrue: false,
                 text: item.text,
@@ -431,12 +435,35 @@
 
             allHeadlines = [...trueHeadlines, ...falseHeadlines];
 
+            // Shuffle the main headlines
             for (let i = allHeadlines.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [allHeadlines[i], allHeadlines[j]] = [allHeadlines[j], allHeadlines[i]];
             }
+
+            // Insert the attention check at the 3rd position (index 2)
+            if (attentionCheckItem) {
+                allHeadlines.splice(2, 0, {
+                    img: attentionCheckItem.image,
+                    isTrue: false, // It's technically misinfo, but we treat it special
+                    text: attentionCheckItem.text,
+                    debunk: attentionCheckItem.debunk
+                });
+            }
+
              // Pre-generate and store the advice ratings for each headline
             headlineAdviceRatings = allHeadlines.map(headline => {
+                // Special advice for attention check
+                if (headline.text === "Attention check") {
+                    return {
+                        human: [], // Not needed, will be handled by getAdviceHTML
+                        llm: [],
+                        hybrid: [],
+                        attention: [true, true, true, false, false, false] // 3 green, 3 red
+                    };
+                }
+                
+                // Normal advice for other headlines
                 const isTrue = headline.isTrue;
                 const hybridHuman = generateCrowdRatings(3, isTrue).map(r => ({ type: 'human', rating: r }));
                 const hybridLlm = generateCrowdRatings(3, isTrue).map(r => ({ type: 'robot', rating: r }));
@@ -447,6 +474,7 @@
                     hybrid: [...hybridHuman, ...hybridLlm]
                 };
             });
+            
             headlines = allHeadlines.map(h => h.text);
             factCheckerRatings = allHeadlines.map(h => h.isTrue ? 'TRUE' : 'FALSE');
         }
@@ -1014,7 +1042,7 @@
 
                     return `
                         <h1 class="question-title">Your Advisors</h1>
-                        <p class="mb-6">To help you decide, you can choose to receive advice from different sources or to receive no advice. Please read the descriptions and make your selection.</p>
+                        <p class="mb-6">To help you decide, you can choose to receive advice from one of three different sources or to receive no advice. Please read the descriptions and make your selection.</p>
                         <div id="self-select-options" class="space-y-4">
                            ${optionsHTML}
                         </div>
@@ -1051,14 +1079,63 @@
                         case 'LLM-only': info = `<p class="mb-4">To help you make your judgment,  you will receive advice from 6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                         case 'Hybrid': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                     }
-                    const exampleHTML = getAdviceExampleHTML(adviceCondition);
+
+                    // --- NEW LOGIC START ---
+                    let exampleHTML = '';
+                    let exampleText = '';
+                    let exampleIconsHTML = '';
+
+                    // Get the correct example text and icons based on the condition
+                    switch(adviceCondition) {
+                        case 'Fact-checker':
+                            exampleText = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
+                            exampleIconsHTML = `<img src="${ICONS.human.green}" alt="Fact-check rating" class="advice-icon">`;
+                            break;
+                        case 'Human-only':
+                            exampleText = `4 out of 6 human raters judged the headline as <strong>Accurate</strong>.`;
+                            exampleIconsHTML = [...Array(4)].map(() => `<img src="${ICONS.human.green}" class="advice-icon">`).join('') +
+                                            [...Array(2)].map(() => `<img src="${ICONS.human.red}" class="advice-icon">`).join('');
+                            break;
+                        case 'LLM-only':
+                            exampleText = `5 out of 6 AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                            exampleIconsHTML = [...Array(5)].map(() => `<img src="${ICONS.robot.green}" class="advice-icon">`).join('') +
+                                            `<img src="${ICONS.robot.red}" class="advice-icon">`;
+                            break;
+                        case 'Hybrid':
+                            exampleText = `5 out of 6 human raters and AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                            exampleIconsHTML = `<img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.red}" class="advice-icon">` +
+                                            `<img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon">`;
+                            break;
+                    }
+
+                    // Build the new example format for all conditions
+                    exampleHTML = `
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 mt-4">
+                            <p class="mb-2 text-sm text-center">Here is an example of what the advice will look like:</p>
+                            
+                            <!-- 1. The Advice Card -->
+                            <div class="advice-card">
+                                <p class="mb-2">${exampleText}</p>
+                                <div class="icon-container" style="justify-content: center;">
+                                    ${exampleIconsHTML}
+                                </div>
+                            </div>
+
+                            <!-- 2. The Headline Image -->
+                            <div class="mb-4 flex flex-col items-center justify-center">
+                                <img src="${practiceHeadline.image}" alt="Practice News Stimulus" class="max-w-full max-h-96 rounded shadow-md" />
+                            </div>
+                        </div>
+                    `;
+                    // --- NEW LOGIC END ---
+
                     return `
                         <div>
                             <h1 class="question-title">Your Advisors</h1>
                             <div class="text-gray-700 space-y-4 my-8">
                                 ${info}
                                 ${exampleHTML}
-                                <p class="text-gray-600 mt-6">This advice will be displayed above each headline.</p>
+                                <!-- <p class="text-gray-600 mt-6">This advice will be displayed above each headline.</p> -->
                             </div>
                             <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                         </div>
@@ -1070,21 +1147,114 @@
                 id: 'feedback_instructions',
                 condition: (c) => ['Control (Feedback)', 'Fact-checker (Feedback)', 'Human-only (Feedback)', 'LLM-only (Feedback)', 'Hybrid (Feedback)', 'Self-select (Feedback)'].includes(userCondition), // UPDATED
                 getHTML: () => {
+                    // --- Start of dynamic text logic ---
+                    const practiceAnswer = surveyData.practice?.confidence;
+                    const practiceIsTrue = !practiceHeadline.misinfo; // This is true
+                    const userThinksInaccurate = practiceAnswer ? practiceAnswer.includes('inaccurate') : false;
+                    const userWasCorrect = practiceAnswer ? (practiceIsTrue === !userThinksInaccurate) : false; // Default to false if no answer
+
+                    let headlineStatusText = `This headline is <span class="text-green-400">ACCURATE.</span>`; // Practice headline is accurate
+                    let userJudgmentText = '';
+                    let exampleExplanationText = '';
+
+                    if (practiceAnswer) {
+                        if (userWasCorrect) {
+                            userJudgmentText = `<span class="text-green-400">Your answer was CORRECT.</span>`;
+                            exampleExplanationText = "Here is an example of what feedback will look like. This headline is accurate and it was judged as accurate, hence, a correct response.";
+                        } else {
+                            userJudgmentText = `<span class="text-red-400">Your answer was INCORRECT.</span>`;
+                            exampleExplanationText = "Here is an example of what feedback will look like. This headline is accurate, but it was judged as inaccurate, hence, an incorrect response.";
+                        }
+                    } else {
+                        userJudgmentText = `<span class="text-gray-400">Your answer will appear here.</span>`;
+                        exampleExplanationText = "Here is an example of what feedback will look like.";
+                    }
+                    // --- End of dynamic text logic ---
+
                     // Check if this is a "Control" feedback condition (either directly or via self-select)
+                    let currentAdviceCondition = selfSelectChoice || userCondition;
                     let isControlFeedback = false;
-                    if (userCondition === 'Control (Feedback)') {
-                        isControlFeedback = true;
-                    } else if (userCondition === 'Self-select (Feedback)' && selfSelectChoice === 'Control') {
+                    if (currentAdviceCondition === 'Control (Feedback)' || currentAdviceCondition === 'Control') {
                         isControlFeedback = true;
                     }
 
-                    let explanationText = 'Alongside, you will also see whether your response was correct or incorrect.';
+                    let mainExplanationText = 'Alongside, you will also see whether your response was correct or incorrect.';
+                    let exampleHTML = '';
+                    let exampleAdviceHTML = ''; // This will hold the advisor icon block
+
+                    // Get the correct advice example (if not control)
+                    if (!isControlFeedback) {
+                        // Remap condition name if needed
+                        if (currentAdviceCondition.includes('(Feedback)')) {
+                            currentAdviceCondition = currentAdviceCondition.replace(' (Feedback)', '');
+                        }
+
+                        let exampleAdviceTitle = '';
+                        let exampleAdviceIcons = '';
+                        
+                        // Using the static examples from getAdviceExampleHTML
+                        switch(currentAdviceCondition) {
+                            case 'Fact-checker':
+                                exampleAdviceTitle = `This headline is from a credible news source and is rated as <strong>accurate</strong>.`;
+                                exampleAdviceIcons = `<img src="${ICONS.human.green}" alt="Fact-check rating" class="advice-icon">`;
+                                break;
+                            case 'Human-only':
+                                exampleAdviceTitle = `4 out of 6 human raters judged the headline as <strong>Accurate</strong>.`;
+                                exampleAdviceIcons = [...Array(4)].map(() => `<img src="${ICONS.human.green}" class="advice-icon">`).join('') +
+                                                    [...Array(2)].map(() => `<img src="${ICONS.human.red}" class="advice-icon">`).join('');
+                                break;
+                            case 'LLM-only':
+                                exampleAdviceTitle = `5 out of 6 AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                                exampleAdviceIcons = [...Array(5)].map(() => `<img src="${ICONS.robot.green}" class="advice-icon">`).join('') +
+                                                    `<img src="${ICONS.robot.red}" class="advice-icon">`;
+                                break;
+                            case 'Hybrid':
+                                exampleAdviceTitle = `5 out of 6 human raters and AI chat bots judged the headline as <strong>Accurate</strong>.`;
+                                exampleAdviceIcons = `<img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.green}" class="advice-icon"><img src="${ICONS.human.red}" class="advice-icon">` +
+                                                    `<img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon"><img src="${ICONS.robot.green}" class="advice-icon">`;
+                                break;
+                        }
+                        
+                        if (exampleAdviceTitle) {
+                            exampleAdviceHTML = `
+                                <div class="text-center mb-4">
+                                    <p class="mb-2">${exampleAdviceTitle}</p>
+                                    <div class="icon-container" style="justify-content: center;">
+                                        ${exampleAdviceIcons}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    // Now, build the single exampleHTML for everyone
+                    exampleHTML = `
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 mt-4 opacity-95">
+                            
+                            <p class="mb-4 text-sm text-center">${exampleExplanationText}</p>
+
+                            ${exampleAdviceHTML} <!-- This will be empty for Control, or populated for others -->
+
+                            <div class="mb-4 flex flex-col items-center justify-center" style="position: relative;">
+                                <img src="${practiceHeadline.image}" alt="Example News Stimulus" class="max-w-full max-h-96 rounded shadow-md">
+                                
+                                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 8px;">
+                                    <p class="text-white text-3xl font-bold" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">${headlineStatusText}</p>
+                                    <p class="text-white text-3xl font-bold mt-6" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">${userJudgmentText}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
 
                     return `
                         <div class="text-left">
                             <h1 class="text-2xl font-bold mb-4">Feedback</h1>
                             <p class="text-gray-600 mb-6">After each trial, you will also see whether the news headline was accurate or inaccurate.<br><br> A headline that was flagged as inaccurate by an independent fact-checking organization will be indicated by the word "Inaccurate". If the headline comes from a credible source, this will be indicated by the word "Accurate".</p>
-                            <p class="text-gray-600 mb-6">${explanationText}</p>
+                            <p class="text-gray-600 mb-6">${mainExplanationText}</p> 
+
+                            ${exampleHTML}
+
                             <div class="flex justify-between mt-8">
                                 <button onclick="prevStep()" class="btn btn-secondary">Back</button>
                                 <button onclick="nextStep()" class="btn btn-primary">Next</button>
@@ -1240,7 +1410,7 @@
                         <img id="debunkImage" src="" alt="Debunked headline image" class="max-h-64 rounded-lg shadow" />
                         <div id="debunkExplanation" class="text-md text-gray-700 text-center pt-4"></div>
                     </div>
-                    <div class="flex justify-center items-center mt-8 w-full max-w-md mx-auto">
+                    <div classJ="flex justify-center items-center mt-8 w-full max-w-md mx-auto">
                         <button id="debunkNav" class="btn btn-primary">Next</button>
                     </div>
                 `
@@ -1322,6 +1492,7 @@
         function getAdviceHTML(headlineIndex) {
             const condition = selfSelectChoice || userCondition;
             const headlineObj = allHeadlines[headlineIndex]; // Get the headline object
+            const ratings = headlineAdviceRatings[headlineIndex]; // Get pre-generated ratings
 
             // NEW: Handle attention check first
             if (headlineObj.text === "Attention check") {
@@ -1333,21 +1504,11 @@
                 let iconsHTML = '';
                 
                 // Add 3 green and 3 red attention icons, ordered
-                let icons = [
-                    ...Array(3).fill(ICONS.attention_icon.green),
-                    ...Array(3).fill(ICONS.attention_icon.red)
-                ];
-                // Shuffle them -- REMOVED
-                /*
-                for (let i = icons.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [icons[i], icons[j]] = [icons[j], icons[i]];
-                }
-                */
-
-                iconsHTML = icons.map((icon, i) => 
-                    `<img src="${icon}" alt="Attention icon" class="advice-icon">`
+                const attentionRatings = ratings.attention; // Use pre-generated ratings
+                iconsHTML = attentionRatings.map(rating => 
+                    `<img src="${rating ? ICONS.attention_icon.green : ICONS.attention_icon.red}" alt="Attention icon" class="advice-icon">`
                 ).join('');
+
 
                 return `
                     <div class="advice-card">
@@ -1363,7 +1524,6 @@
             if (condition === 'Control' || condition === 'Control (Feedback)') return '';
 
             const isTrueHeadline = headlineObj.isTrue;
-            const ratings = headlineAdviceRatings[headlineIndex]; // Get pre-generated ratings
             let adviceTitle = '';
             let iconsHTML = '';
 
@@ -1477,7 +1637,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
                             <div class="option-grid">
-                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            ${['Very <br>unfamiliar', 'Moderately <br>unfamiliar', 'Slightly <br>unfamiliar', 'Slightly <br>familiar', 'Moderately <br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -1532,7 +1692,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
                             <div class="option-grid">
-                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<ch>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -2026,7 +2186,7 @@
                         // Call the original "summary screen" feedback renderer for advice conditions
                         renderFeedbackScreen();
                     }
-                    // NEW LOGIC ENDS HERE
+                    // NEW LOGLOGIC ENDS HERE
                     */
                 } else {
                     proceedToNextHeadline();
@@ -2327,45 +2487,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
