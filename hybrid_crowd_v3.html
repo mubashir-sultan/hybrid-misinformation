@@ -331,7 +331,12 @@
             robot: {
                 green: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_VIDQNEyD9IxqSj4',
                 red: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_P75HBHEr1D5qLbf'
+            },
+            attention_icon: {
+                green: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_BSoVTOIpvnmpmld',
+                red: 'https://mpib.qualtrics.com/ControlPanel/File.php?F=F_ypKc5X8d6VciDQg'
             }
+
         };
 
         // Preload all headline images and icons at the start
@@ -617,7 +622,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Which would you say are your MAIN sources of news? Please rank your top 3 choices in order of preference.</p>
                             <div id="news-source-options" class="option-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
-                                ${['TV', 'Print', 'Social and video networks', 'Online news sites/apps', 'News podcasts', 'AI chat bots'].map((o,i) => `
+                                ${['TV', 'Print', 'Social media', 'Online news sites/apps', 'News podcasts', 'AI chat bots'].map((o,i) => `
                                     <div id="ns_pref_${i}"
                                          data-value="${o}"
                                          class="option-label option-rank-button" 
@@ -790,9 +795,13 @@
             //             `).join('')}
             //         </div>
             //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+            //                 `
+            //             }).join('')}
+            //         </div>
+            //         <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
             //     `
-            // },           
-// PART 1: CONFORMITY/ADVICE SCALE
+            // },
+            // PART 1: CONFORMITY/ADVICE SCALE
             {
                 id: 'conformity_scale',
                 html: `
@@ -808,14 +817,10 @@
                             <div class="mb-6">
                                 <p class="mb-3 text-center">${statement}</p>
                                 <div class="option-grid">
-                                    ${['0', '1', '2', '3', '4', '5', '6'].map((opt, i) => `
+                                    ${[ 'Strongly disagree', 'Disagree', 'Neither agree nor disagree', 'Agree', 'Strongly agree' ].map((opt, i) => `
                                         <div>
-                                            <input type="radio" name="conformity_${idx+1}" value="${opt}" id="conformity_${idx+1}_${i}" class="hidden">
-                                            <label for="conformity_${idx+1}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem;">
-                                                <span class="text-sm font-semibold">${opt}</span>
-                                                ${i === 0 ? '<span class="text-xs text-gray-500">(Never)</span>' : ''}
-                                                ${i === 6 ? '<span class="text-xs text-gray-500">(Always)</span>' : ''}
-                                            </label>
+                                            <input type="radio" name="conformity_${idx+1}" value="${i+1}" id="conformity_${idx+1}_${i}" class="hidden">
+                                            <label for="conformity_${idx+1}_${i}" class="option-button">${opt}</label>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -961,7 +966,7 @@
                 id: 'task_transition',
                 html: `
                     <div class="text-left">
-                        <p class="text-gray-600 mb-6">Now for the main part of the study. You will be presented with a series of news headlines as they would appear on social media and asked to evaluate them.</p>
+                        <p class="text-gray-600 mb-6">Now, for Part 2 of this study, you will be presented with a series of news headlines as they would appear on social media and asked to evaluate them.</p>
                         <p>For each headline, you will be asked to rate the following:</p>
                         <br>
                         <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
@@ -969,7 +974,7 @@
                             <li>Have you seen or heard about the headline before?</li>
                         </ol>
                         <br>
-                        <p>Let's do a practice round of this next.</p>
+                        <p>Let's start with a practice round.</p>
                         <div class="flex justify-between mt-8">
                             <button onclick="prevStep()" class="btn btn-secondary">Back</button>
                             <button onclick="nextStep()" class="btn btn-primary">Next</button>
@@ -1009,7 +1014,7 @@
 
                     return `
                         <h1 class="question-title">Your Advisors</h1>
-                        <p class="mb-6">For the upcoming headlines, you can choose the advisor you would like to receive advice from. Please read the descriptions and make your selection.</p>
+                        <p class="mb-6">To help you decide, you can choose to receive advice from different sources or to receive no advice. Please read the descriptions and make your selection.</p>
                         <div id="self-select-options" class="space-y-4">
                            ${optionsHTML}
                         </div>
@@ -1041,10 +1046,10 @@
                     }
                     let info = '';
                     switch(adviceCondition) {
-                        case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization with each headline. A red icon indicates that the fact-checker deemed this headline to be inaccurate. A green icon indicates an accurate judgment (meaning the headline comes from a credible source).</p>`; break;
-                        case 'Human-only': info = `<p class="mb-4">For each headline, you will see how each of the six human raters judged its accuracy. A red icon indicates the headline was judged as inaccurate, and a green icon indicates the headline was judged as accurate.</p>`; break;
-                        case 'LLM-only': info = `<p class="mb-4">For each headline, you will see how each of the six AI chat bots judged its accuracy. An icon presented in green will indicate that the headline was judged as accurate, whereas an icon in red will indicate that the headline was judged as inaccurate.</p>`; break;
-                        case 'Hybrid': info = `<p class="mb-4">For each headline, you will see how three different humans and three different AI chat bots  judged its accuracy. A red icon indicates the headline was judged as inaccurate (either by a human or an AI), a green icon indicates the headline was judged as accurate.</p>`; break;
+                        case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization, and whether they deemed the headline to be accurate (green icon) or inaccurate (red icon).</p>`; break;
+                        case 'Human-only': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 6 human adults that were recruited online and observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
+                        case 'LLM-only': info = `<p class="mb-4">To help you make your judgment,  you will receive advice from 6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
+                        case 'Hybrid': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                     }
                     const exampleHTML = getAdviceExampleHTML(adviceCondition);
                     return `
@@ -1073,12 +1078,7 @@
                         isControlFeedback = true;
                     }
 
-                    let explanationText = '';
-                    if (isControlFeedback) {
-                        explanationText = 'Alongside, you will also see your own response, this way you can determine whether your response was correct or incorrect.';
-                    } else {
-                        explanationText = 'Alongside, you will also see your own response and the responses of your advisors, this way you can determine whether your response and that of your advisors was correct or incorrect.';
-                    }
+                    let explanationText = 'Alongside, you will also see whether your response was correct or incorrect.';
 
                     return `
                         <div class="text-left">
@@ -1141,6 +1141,8 @@
                                             <input type="radio" name="advisor_trust_${item}" value="${opt}" id="adv_trust_${item}_${i}" class="hidden">
                                             <label for="adv_trust_${item}_${i}" class="option-button" style="flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.5rem; font-size: 0.75rem;">
                                                 <span class="text-sm font-semibold">${opt}</span>
+                                                ${i === 0 ? '<span class="text-xs text-gray-500" style="line-height: 1;">(Not at<br>all)</span>' : ''}
+                                                ${i === 7 ? '<span class="text-xs text-gray-500" style="line-height: 1;">(Very)</span>' : ''}
                                             </label>
                                         </div>
                                     `).join('')}
@@ -1319,9 +1321,48 @@
 
         function getAdviceHTML(headlineIndex) {
             const condition = selfSelectChoice || userCondition;
-            if (condition === 'Control') return '';
+            const headlineObj = allHeadlines[headlineIndex]; // Get the headline object
 
-            const isTrueHeadline = allHeadlines[headlineIndex].isTrue;
+            // NEW: Handle attention check first
+            if (headlineObj.text === "Attention check") {
+                
+                // NEW FIX: Also check for Control condition here
+                if (condition === 'Control' || condition === 'Control (Feedback)') return '';
+
+                let adviceTitle = "This is an attention check.";
+                let iconsHTML = '';
+                
+                // Add 3 green and 3 red attention icons, ordered
+                let icons = [
+                    ...Array(3).fill(ICONS.attention_icon.green),
+                    ...Array(3).fill(ICONS.attention_icon.red)
+                ];
+                // Shuffle them -- REMOVED
+                /*
+                for (let i = icons.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [icons[i], icons[j]] = [icons[j], icons[i]];
+                }
+                */
+
+                iconsHTML = icons.map((icon, i) => 
+                    `<img src="${icon}" alt="Attention icon" class="advice-icon">`
+                ).join('');
+
+                return `
+                    <div class="advice-card">
+                        <p class="mb-2">${adviceTitle}</p>
+                            <div class="icon-container">
+                            ${iconsHTML}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Existing logic for non-attention-check headlines
+            if (condition === 'Control' || condition === 'Control (Feedback)') return '';
+
+            const isTrueHeadline = headlineObj.isTrue;
             const ratings = headlineAdviceRatings[headlineIndex]; // Get pre-generated ratings
             let adviceTitle = '';
             let iconsHTML = '';
@@ -1345,6 +1386,16 @@
                     adviceTitle = `${humanAccurateCount} out of 6 humans rated the headline as <strong>Accurate</strong>.`;
                     iconsHTML = [...humanRatings].sort((a, b) => b - a).map(rating => 
                         `<img src="${rating ? ICONS.human.green : ICONS.human.red}" alt="Human rating" class="advice-icon">`
+                    ).join('');
+                    break;
+
+                case 'LLM-only (Feedback)': // ADDED THIS BLOCK
+                case 'LLM-only':
+                    const llmRatings = ratings.llm; // Use stored ratings
+                    const llmAccurateCount = llmRatings.filter(r => r).length;
+                    adviceTitle = `${llmAccurateCount} out of 6 AI chat bots rated the headline as <strong>Accurate</strong>.`;
+                    iconsHTML = [...llmRatings].sort((a, b) => b - a).map(rating => 
+                        `<img src="${rating ? ICONS.robot.green : ICONS.robot.red}" alt="LLM rating" class="advice-icon">`
                     ).join('');
                     break;
 
@@ -1417,7 +1468,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                                ${["Very confident<br>it's accurate", "Moderately confident<br>it's accurate", "Somewhat confident<br>it's accurate", "Somewhat confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Very confident<br>it's inaccurate"].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                                ${["Very confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Somewhat confident<br>it's inaccurate", "Somewhat confident<br>it's accurate", "Moderately confident<br>it's accurate", "Very confident<br>it's accurate"].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -1472,7 +1523,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
                             <div class="option-grid">
-                            ${["Very confident<br>it's accurate", "Moderately confident<br>it's accurate", "Somewhat confident<br>it's accurate", "Somewhat confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Very confident<br>it's inaccurate"].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
+                            ${["Very confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Somewhat confident<br>it's inaccurate", "Somewhat confident<br>it's accurate", "Moderately confident<br>it's accurate", "Very confident<br>it's accurate"].map((o,i)=>`<div><input type="radio" name="confidence" value="${o.replace('<br>', ' ')}" id="conf_${i}" class="hidden"><label class="option-button" for="conf_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -2023,10 +2074,10 @@
             } else {
                 // It's not an attention check.
                 
-                // 1. Determine if the user was correct
+                // 1. Determine if the user was correct (with the fix)
                 if (userAnswer) {
-                    const userThinksInaccurate = userAnswer.includes('inaccurate'); // CHANGED THIS LINE
-                    const userWasCorrect = (isTrue === !userThinksInaccurate); // CHANGED THIS LINE
+                    const userThinksInaccurate = userAnswer.includes('inaccurate');
+                    const userWasCorrect = (isTrue === !userThinksInaccurate);
 
                     if (userWasCorrect) {
                         userJudgmentText = `<span class="text-green-400">Your answer was CORRECT.</span>`;
@@ -2040,11 +2091,11 @@
             }
             
             const overlayHTML = `
-                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 8px;">
-                    <h2 class="text-white text-3xl font-bold" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 8px;">
+                    ${headlineStatusText ? `<p class="text-white text-3xl font-bold" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">${headlineStatusText}</p>` : ''}
+                    <p class="text-white text-3xl font-bold ${headlineStatusText ? 'mt-6' : ''}" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
                         ${userJudgmentText}
-                        ${headlineStatusText ? `<br><br>${headlineStatusText}` : ''}
-                    </h2>
+                    </p>
                 </div>
             `;
             
@@ -2057,20 +2108,20 @@
             `;
 
             // 3. Build the veracity question, highlighting the user's answer
-            const options = ["Very confident<br>it's accurate", "Moderately confident<br>it's accurate", "Somewhat confident<br>it's accurate", "Somewhat confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Very confident<br>it's inaccurate"];
+            const options = ["Very confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Somewhat confident<br>it's inaccurate", "Somewhat confident<br>it's accurate", "Moderately confident<br>it's accurate", "Very confident<br>it's accurate"];
             
             // NEW: Determine if user was correct and create feedback message
-            /* THIS BLOCK IS NO LONGER NEEDED HERE
+            /* MOVED THIS LOGIC INTO THE OVERLAY
             let feedbackMessageHTML = '';
             // Only show correct/incorrect if it's not the attention check
             if (headlineObj.text !== "Attention check" && userAnswer) {
-                const userThinksAccurate = userAnswer.includes('accurate');
-                const userWasCorrect = (userThinksAccurate === isTrue);
+                const userThinksInaccurate = userAnswer.includes('inaccurate');
+                const userWasCorrect = (isTrue === !userThinksInaccurate);
 
                 if (userWasCorrect) {
-                    feedbackMessageHTML = `<p class="text-xl text-center font-medium text-green-600 mt-6 mb-2">Your judgment was CORRECT.</p>`;
+                    feedbackMessageHTML = `<p class="text-xl text-center font-medium text-green-600 mt-6 mb-2">Your answer was CORRECT.</p>`;
                 } else {
-                    feedbackMessageHTML = `<p class="text-xl text-center font-medium text-red-600 mt-6 mb-2">Your judgment was INCORRECT.</p>`;
+                    feedbackMessageHTML = `<p class="text-xl text-center font-medium text-red-600 mt-6 mb-2">Your answer was INCORRECT.</p>`;
                 }
             }
             */
@@ -2276,6 +2327,18 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
