@@ -549,7 +549,7 @@
                             <p>This study is about how people interact with news in today's digital world. It has two parts:</p>
                             <ul class="list-disc list-inside bg-gray-50 p-4 rounded-md">
                                 <li class="mb-2">In Part 1, we will ask you some general questions.</li>
-                                <li>In Part 2, you will be asked to evaluate a series of news headlines.</li>
+                                <li>In Part 2, you will be presented with a series of news headlines and we will ask you to evaluate them.</li>
                             </ul>
                             <p class="text-sm text-gray-500 mt-4">Note that the study contains attention checks.</p>
                         </div>
@@ -604,7 +604,7 @@
                 id: 'trust_questions',
                 getHTML: () => {
                     const groups = [
-                        { label: 'The Federal Government', name: 'trust_gov' },
+                        { label: 'The Government', name: 'trust_gov' },
                         { label: 'News Organizations (e.g., newspapers, TV networks, online news sites)', name: 'trust_trad_media' },
                         { label: 'Content creators (e.g., YouTubers, podcasters, social media influencers)', name: 'trust_new_media' },
                         { label: 'Professional Fact-Checkers', name: 'trust_fact_checkers' }
@@ -957,7 +957,7 @@
                 id: 'got_confidence_est',
                 html: `
                     <div class="space-y-4 text-left text-gray-700">
-                        <p>You just saw 10 images. Because there were only two answer options on each of the images, just by guessing, you would have (on average) picked the correct option 5 out of 10 times.</p>
+                        <p>You just saw 10 images. Because there were only two answer options on each of the images, <strong>just by guessing, you would have (on average) picked the correct option 5 out of 10 times</strong>.</p>
                         <p class="font-medium mt-4">For how many of the images do you believe you chose the right option?</p>
                         <p>[Please enter a number from 0 to 10 to indicate how many of the images you think you got correct.]</p>
                         <div class="mt-4 flex justify-center">
