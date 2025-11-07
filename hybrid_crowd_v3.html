@@ -316,11 +316,11 @@
         </div>
     </div>
 
-    <div id="co-author-note-container" class="hidden" style="max-width: 1080px; margin: -1rem auto 1rem;">
+    <!-- <div id="co-author-note-container" class="hidden" style="max-width: 1080px; margin: -1rem auto 1rem;">
         <div class="co-author-note">
             <p><span class="font-bold">Co-author note:</span> You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.</p>
         </div>
-    </div>
+    </div> -->
 
     <script>
         const ICONS = {
@@ -518,14 +518,14 @@
             surveyData.condition = userCondition;
         }
 
-        const coAuthorNotes = {
-            'media_usage': "You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.",
-            'ai_tools_screener': 'Press "Yes" to reveal follow-up questions.',
-            'ai_factcheck_combined': 'Press "Yes" to reveal follow-up questions.',
-            'politics': 'The pointer and value for the slider will be hidden initially to avoid anchoring.',
-            'got_instructions': "The images appear very rapidly (250ms). That's the measure, we can't really do anything about it.",
-            'conditionInfo': "from reading this are you more confused or are things rather clear?"
-        };
+        // const coAuthorNotes = {
+        //     'media_usage': "You don't have to answer all of the questions to proceed (but of course do read them). Just click 'Next' to move to the next page.",
+        //     'ai_tools_screener': 'Press "Yes" to reveal follow-up questions.',
+        //     'ai_factcheck_combined': 'Press "Yes" to reveal follow-up questions.',
+        //     'politics': 'The pointer and value for the slider will be hidden initially to avoid anchoring.',
+        //     'got_instructions': "The images appear very rapidly (250ms). That's the measure, we can't really do anything about it.",
+        //     'conditionInfo': "from reading this are you more confused or are things rather clear?"
+        // };
 
         // Define platform lists
         const socialPlatformsList = [
@@ -680,7 +680,7 @@
 
                         <!-- Question 3 -->
                         <div>
-                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the top news sources you consume (this can include newspapers, online news sites, YouTubers, social media influencers):</label>
+                            <label class="block font-medium mb-3 text-center" for="top_3_news_trust">Please list the names of the top news sources you consume (this can include newspapers, online news sites, YouTubers, social media influencers):</label>
                             <textarea id="top_3_news_trust" name="top_3_news_trust" class="w-full p-2 border border-gray-300 rounded-md" rows="4" placeholder="1. ...\n2. ...\n3. ..."></textarea>
                         </div>
 
@@ -957,7 +957,7 @@
                 id: 'got_confidence_est',
                 html: `
                     <div class="space-y-4 text-left text-gray-700">
-                        <p>You just saw 10 images. Because there were only two answer options on each of the images, anyone who guessed randomly would have (on average) picked the correct option 5 out of 10 times.</p>
+                        <p>You just saw 10 images. Because there were only two answer options on each of the images, just by guessing, you would have (on average) picked the correct option 5 out of 10 times.</p>
                         <p class="font-medium mt-4">For how many of the images do you believe you chose the right option?</p>
                         <p>[Please enter a number from 0 to 10 to indicate how many of the images you think you got correct.]</p>
                         <div class="mt-4 flex justify-center">
@@ -974,7 +974,7 @@
                         { id: 'crt1', label: "If you're running a race and you pass the person in second place, what place are you in?" },
                         { id: 'crt2', label: "A farmer had 15 sheep and all but 8 died. How many are left?" },
                         { id: 'crt3', label: "Emily’s father has three daughters. The first two are named April and May. What is the third daughter’s name?" },
-                        { id: 'crt4', label: "How many cubic feet of dirt are there in a hole that is 3’ deep x 3’ wide x 3’ long?" }
+                        { id: 'crt4', label: "How many cubic feet of dirt are there in a hole that is 3 feet deep x 3 feet wide x 3 feet long?" }
                     ];
 
                     // Shuffle the questions array (Fisher-Yates shuffle)
@@ -1097,6 +1097,37 @@
                     let exampleHTML = '';
                     let exampleText = '';
                     let exampleIconsHTML = '';
+                    let yourResponseHTML = ''; // <-- ADDED THIS
+
+                    // --- NEW LOGIC START ---
+                    // Check if this is a feedback condition
+                    const isFeedback = userCondition.includes('(Feedback)');
+                    
+                    if (isFeedback) {
+                        const options = ["Very confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Somewhat confident<br>it's inaccurate", "Somewhat confident<br>it's accurate", "Moderately confident<br>it's accurate", "Very confident<br>it's accurate"];
+                        // Use the user's actual practice answer if available, otherwise pick a default
+                        const exampleAnswer = surveyData.practice?.confidence || "Somewhat confident<br>it's inaccurate";
+                        const exampleAnswerVal = exampleAnswer.replace('<br>', ' ');
+                        
+                        yourResponseHTML = `
+                            <div class="mt-6">
+                                <p class="font-medium mb-3 text-center">Your response:</p>
+                                <div class="option-grid">
+                                    ${options.map((o,i) => {
+                                        const val = o.replace('<br>', ' ');
+                                        const isUserAnswer = (val === exampleAnswerVal);
+                                        const highlightClass = isUserAnswer ? 'highlight-user-answer' : '';
+                                        
+                                        return `<div>
+                                                    <label class="option-button ${highlightClass}" style="opacity: 0.9;">${o}</label>
+                                                </div>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    // --- NEW LOGIC END ---
+
 
                     // Get the correct example text and icons based on the condition
                     switch(adviceCondition) {
@@ -1138,6 +1169,9 @@
                             <div class="mb-4 flex flex-col items-center justify-center">
                                 <img src="${practiceHeadline.image}" alt="Practice News Stimulus" class="max-w-full max-h-96 rounded shadow-md" />
                             </div>
+
+                            <!-- 3. ADDED: "Your response" block -->
+                            ${yourResponseHTML}
                         </div>
                     `;
                     // --- NEW LOGIC END ---
@@ -1194,6 +1228,32 @@
                     let mainExplanationText = 'Alongside, you will also see whether your response was correct or incorrect.';
                     let exampleHTML = '';
                     let exampleAdviceHTML = ''; // This will hold the advisor icon block
+                    let yourResponseHTML = ''; // <-- ADDED THIS
+
+                    // --- NEW LOGIC START ---
+                    // Build the "Your response" block for ALL feedback conditions
+                    const options = ["Very confident<br>it's inaccurate", "Moderately confident<br>it's inaccurate", "Somewhat confident<br>it's inaccurate", "Somewhat confident<br>it's accurate", "Moderately confident<br>it's accurate", "Very confident<br>it's accurate"];
+                    const exampleAnswer = surveyData.practice?.confidence || "Somewhat confident<br>it's inaccurate"; // Use practice answer or a default
+                    const exampleAnswerVal = exampleAnswer.replace('<br>', ' ');
+
+                    yourResponseHTML = `
+                        <div class="mt-6">
+                            <p class="font-medium mb-3 text-center">Your response:</p>
+                            <div class="option-grid">
+                                ${options.map((o,i) => {
+                                    const val = o.replace('<br>', ' ');
+                                    const isUserAnswer = (val === exampleAnswerVal);
+                                    const highlightClass = isUserAnswer ? 'highlight-user-answer' : '';
+                                    
+                                    return `<div>
+                                                <label class="option-button ${highlightClass}" style="opacity: 0.9;">${o}</label>
+                                            </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                    // --- NEW LOGIC END ---
+
 
                     // Get the correct advice example (if not control)
                     if (!isControlFeedback) {
@@ -1238,6 +1298,12 @@
                                 </div>
                             `;
                         }
+                    } else {
+                        // --- REMOVED LOGIC ---
+                        // The logic to build yourResponseHTML was here, but has been
+                        // moved up to apply to all feedback conditions.
+                        // This else block is now empty.
+                        // --- END REMOVED LOGIC ---
                     }
 
                     // Now, build the single exampleHTML for everyone
@@ -1256,9 +1322,11 @@
                                     <p class="text-white text-3xl font-bold mt-6" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">${userJudgmentText}</p>
                                 </div>
                             </div>
+                            
+                            ${yourResponseHTML} <!-- <-- ADDED THIS VARIABLE -->
+
                         </div>
                     `;
-
 
                     return `
                         <div class="text-left">
