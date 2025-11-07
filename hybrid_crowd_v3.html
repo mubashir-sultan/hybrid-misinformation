@@ -367,6 +367,24 @@
         }
         const app = document.getElementById('app');
         
+        /**
+         * NEW: Displays a fixation cross for a short duration, then executes a callback.
+         * @param {function} callback The function to call after the cross.
+         */
+        function showFixationCross(callback) {
+            // Set a minimum height to prevent layout collapse, especially on first load
+            app.innerHTML = `<div class="flex justify-center items-center h-96 text-6xl text-gray-400">+</div>`;
+            
+            // Hide progress bar during fixation
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('progress-text').classList.add('hidden');
+
+            setTimeout(() => {
+                // The callback function (e.g., renderHeadlineStep) will
+                // be responsible for showing the progress bar again.
+                callback();
+            }, 500); // 500ms duration
+        }
 
         const items = [
             { id: 1, text: "Judge tells Florida not to threaten TV stations over abortion ads | AP ...", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ciaCiV8TCMoa28g", misinfo: false, debunk: "This is a real news headline." },
@@ -385,7 +403,7 @@
             // { id: 14, text: "Johnny Depp and Keanu Reeves Refused Entry at a Country Club—Two Seconds Later, the Club Was Bought by Them!", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_JZSYLJjcT6FJfkX", misinfo: true, debunk: "There is no credible evidence to support the claim that Johnny Depp and Keanu Reeves were denied entry to a country club and subsequently purchased it. Reputable fact-checking organization Snopes confirms this story is entirely fabricated, with no legitimate sources supporting the incident." },
             // { id: 15, text: "Travis Kelce bought the tiny diner that let him eat on credit in college — but what he turned it into now feeds 120 homeless people every day…", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_Y4wVCoI7zeNgWme", misinfo: true, debunk: "There is no credible evidence that Travis Kelce bought a diner from his college days and transformed it into Elena's Kitchen to feed 120 homeless people daily. Reputable news organizations and sources that cover Kelce have not reported this story, and the fact-checking website Snopes found no evidence to support the claim, identifying its origin as a website known for publishing fabricated content." },
             // { id: 16, text: "Strict 'touch laws' in 31 states, including New York, enforce fines up to $450 for holding electronic devices", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_55gOdgeT2NK8Vaf", misinfo: true, debunk: "The claim that a new, widespread 'touch law' is set to take effect on June 5 across 31 U.S. states, imposing instant fines for holding electronic devices, lacks credible evidence. Fact-checking by Snopes indicates the article mischaracterizes existing state laws against handheld device use as a new and universally implemented 'touch law' taking effect on a specific date, rather than reporting on new legislation." }
-            { id: 17, text: "Attention check", image: "https://mpib.qualtrics.com/ControlPanel/Graphic.php?IM=IM_e7vj18Aducmlsj2", misinfo: true, debunk: "This is an attention check" }
+            { id: 17, text: "Attention check", image: "https://mpib.qualtrics.com/ControlPanel/File.php?F=F_xMQ2LwMaabaYtIV", misinfo: true, debunk: "This is an attention check" }
             
         ];
 
@@ -529,10 +547,10 @@
                         <div class="text-gray-700 space-y-4">
                             <p><strong>Welcome, and thank you for taking part!</strong></p>
                             <p>This study is about how people interact with news in today's digital world. It has two parts:</p>
-                            <ol class="list-decimal list-inside bg-gray-50 p-4 rounded-md">
+                            <ul class="list-disc list-inside bg-gray-50 p-4 rounded-md">
                                 <li class="mb-2">In Part 1, we will ask you some general questions.</li>
                                 <li>In Part 2, you will be asked to evaluate a series of news headlines.</li>
-                            </ol>
+                            </ul>
                             <p class="text-sm text-gray-500 mt-4">Note that the study contains attention checks.</p>
                         </div>
                         <div class="flex justify-between mt-8">
@@ -549,7 +567,7 @@
                     const options = [
                         { id: 'pref_humans', value: 'Human-only', text: '<strong>A group of humans</strong>: Human adults that observed the same news and independently judged whether they thought that the news was accurate or inaccurate.' },
                         { id: 'pref_llms', value: 'LLM-only', text: '<strong>A group of artificial intelligence (AI) chat bots</strong>: AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news and independently judged whether they thought that the news was accurate or inaccurate.' },
-                        { id: 'pref_hybrid', value: 'Hybrid', text: '<strong>A combination of humans and artificial intelligence (AI) chat bots</strong>: A combination of human adults and AI chat bots that observed the same news and independently judged whether they thought the news was accurate or inaccurate. ' }
+                        { id: 'pref_hybrid', value: 'Hybrid', text: '<strong>A combination of humans and artificial intelligence (AI) chat bots</strong>: A combination of human adults and AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news and independently judged whether they thought the news was accurate or inaccurate. ' }
                     ];
                     // Shuffle the options array (Fisher-Yates shuffle)
                     for (let i = options.length - 1; i > 0; i--) {
@@ -576,11 +594,8 @@
                         </div>
                         <div id="advisor-rank-error" class="text-red-500 text-sm mt-4 text-center hidden">Please rank all three options to continue.</div>
                         <div class="flex justify-between mt-8">
-                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
-                            <div>
-                                <button onclick="resetAdvisorRank()" class="btn btn-secondary mr-2">Reset</button>
-                                <button onclick="handleAdvisorPreferenceNext()" class="btn btn-primary">Next</button>
-                            </div>
+                            <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                            <button onclick="handleAdvisorPreferenceNext()" class="btn btn-primary">Next</button>
                         </div>
                     `;
                 }
@@ -623,12 +638,12 @@
                     `).join('');
 
                     return `
-                        <p class="mb-6 font-medium text-center">On a scale of 0–10, where 0 is not at all and 10 is completely, how much do you trust each of the following?</p>
+                        <p class="mb-6 font-medium text-center">On a scale from 0–10, where 0 is not at all and 10 is completely, how much do you trust each of the following?</p>
                         <div class="space-y-8">
                            ${questionsHTML}
                         </div>
                         <div class="flex justify-between mt-8">
-                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                             <button onclick="nextStep()" class="btn btn-primary">Next</button>
                         </div>
                     `;
@@ -650,7 +665,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Which would you say are your MAIN sources of news? Please rank your top 3 choices in order of preference.</p>
                             <div id="news-source-options" class="option-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
-                                ${['TV', 'Print', 'Social media', 'Online news sites/apps', 'News podcasts', 'AI chat bots'].map((o,i) => `
+                                ${['TV', 'Print newspapers/ magazines', 'Social media', 'Online news sites/ apps', 'News podcasts', 'AI chat bots'].map((o,i) => `
                                     <div id="ns_pref_${i}"
                                          data-value="${o}"
                                          class="option-label option-rank-button" 
@@ -671,9 +686,8 @@
 
                     </div>
                     <div class="flex justify-between mt-8">
-                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                         <div>
-                            <button onclick="resetNewsSourceRank()" class="btn btn-secondary mr-2">Reset</button>
                             <button onclick="handleTrustInNewsNext()" class="btn btn-primary">Next</button>
                         </div>
                     </div>
@@ -695,7 +709,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-4"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },            
             // PART 2: YOUR MEDIA HABITS & VIEWS
@@ -736,7 +750,7 @@
                         </div>
                         -->
                     </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
                 }
             },
@@ -855,7 +869,7 @@
                             </div>
                         `).join('')}
                     </div>
-                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-4"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },          
 // PART 1: CONSPIRACY BELIEFS
@@ -879,7 +893,7 @@
                             </div>
                         `).join('')}
                     </div>
-                    <div class="flex justify-between mt-4"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-4"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },              
             // {
@@ -930,7 +944,6 @@
                     <div class="flex justify-between mt-8">
                          <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                          <div> <!-- Added a div to group buttons -->
-                            <button onclick="skipGOTTask()" class="btn btn-secondary mr-2">Skip</button> <!-- Added Skip button -->
                             <button onclick="startGOTTrial()" class="btn btn-primary">Start Task</button>
                          </div>
                     </div>
@@ -945,13 +958,13 @@
                 html: `
                     <div class="space-y-4 text-left text-gray-700">
                         <p>You just saw 10 images. Because there were only two answer options on each of the images, anyone who guessed randomly would have (on average) picked the correct option 5 out of 10 times.</p>
-                        <p class="font-medium mt-4">For how many of the images do you believe you chose the right options?</p>
-                        <p>[Please enter a number between 0 and 10 to indicate how many of the images you think you got correct. (Note: those who guessed would have gotten 5 correct on average).]</p>
+                        <p class="font-medium mt-4">For how many of the images do you believe you chose the right option?</p>
+                        <p>[Please enter a number from 0 to 10 to indicate how many of the images you think you got correct.]</p>
                         <div class="mt-4 flex justify-center">
                             <input type="number" name="got_est" id="got_est" min="0" max="10" step="1" class="w-1/4 p-2 border border-gray-300 rounded-md text-center">
                         </div>
                     </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
              { // Moved CRT step here
@@ -980,11 +993,11 @@
                     `).join('');
 
                     return `
-                        <h1 class="question-title">Final Questions Before the Main Task</h1>
+                        <h1 class="question-title">Final questions for Part 1</h1>
                         <div class="space-y-6">
                             ${questionsHTML}
                         </div>
-                        <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                        <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                     `;
                 }
             },
@@ -1004,8 +1017,8 @@
                         <br>
                         <p>Let's start with a practice round.</p>
                         <div class="flex justify-between mt-8">
-                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
-                            <button onclick="nextStep()" class="btn btn-primary">Next</button>
+                            <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                            <button onclick="startPracticeRound()" class="btn btn-primary">Next</button> <!-- CHANGED onclick -->
                         </div>
                     </div>
                 `
@@ -1020,7 +1033,7 @@
                     const options = [
                         // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
                         { id: 'ss_humans', value: 'Human-only', text: 'Advice from 6 different humans.', description: '6 human adults that were recruited online and observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
-                        { id: 'ss_llms', value: 'LLM-only', text: 'Advice from 6 different AI chat bots.', description: '6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
+                        { id: 'ss_llms', value: 'LLM-only', text: 'Advice from 6 different AI chat bots.', description: '6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
                         { id: 'ss_hybrid', value: 'Hybrid', text: 'Advice from 3 different humans and 3 different AI chat bots.', description: '3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
                         { id: 'ss_none', value: 'Control', text: 'No advice.', description: 'You will receive no advice when making your judgments.' }
                     ];
@@ -1041,14 +1054,14 @@
                     `).join('');
 
                     return `
-                        <h1 class="question-title">Your Advisors</h1>
+                        <h1 class="question-title">Your advisors</h1>
                         <p class="mb-6">To help you decide, you can choose to receive advice from one of three different sources or to receive no advice. Please read the descriptions and make your selection.</p>
                         <div id="self-select-options" class="space-y-4">
                            ${optionsHTML}
                         </div>
                         <div id="self-select-error" class="text-red-500 text-sm mt-2 text-center hidden">Please make a selection to continue.</div>
                         <div class="flex justify-between mt-8">
-                            <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                            <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                             <button onclick="handleSelfSelectAdvisor()" class="btn btn-primary">Next</button>
                         </div>
                     `;
@@ -1076,7 +1089,7 @@
                     switch(adviceCondition) {
                         case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization, and whether they deemed the headline to be accurate (green icon) or inaccurate (red icon).</p>`; break;
                         case 'Human-only': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 6 human adults that were recruited online and observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
-                        case 'LLM-only': info = `<p class="mb-4">To help you make your judgment,  you will receive advice from 6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
+                        case 'LLM-only': info = `<p class="mb-4">To help you make your judgment,  you will receive advice from 6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                         case 'Hybrid': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                     }
 
@@ -1131,13 +1144,13 @@
 
                     return `
                         <div>
-                            <h1 class="question-title">Your Advisors</h1>
+                            <h1 class="question-title">Your advisors</h1>
                             <div class="text-gray-700 space-y-4 my-8">
                                 ${info}
                                 ${exampleHTML}
                                 <!-- <p class="text-gray-600 mt-6">This advice will be displayed above each headline.</p> -->
                             </div>
-                            <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                            <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                         </div>
                     `;
                 }
@@ -1256,7 +1269,7 @@
                             ${exampleHTML}
 
                             <div class="flex justify-between mt-8">
-                                <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                                <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                                 <button onclick="nextStep()" class="btn btn-primary">Next</button>
                             </div>
                         </div>
@@ -1271,7 +1284,7 @@
                         <h1 class="text-2xl font-bold mb-4">All Set!</h1>
                         <p class="text-gray-600 mb-6">You will now see 32 news headlines. Please try your best to evaluate them.</p>
                         <div class="flex justify-center">
-                            <button onclick="nextStep()" class="btn btn-primary">Start</button>
+                            <button onclick="startHeadlineTask()" class="btn btn-primary">Start</button> <!-- CHANGED onclick -->
                         </div>
                     </div>
                 `
@@ -1285,7 +1298,7 @@
                 html: `
                     <div class="text-center">
                         <h1 class="text-2xl font-bold mb-4">Thanks!</h1>
-                        <p class="text-gray-600 mb-6">You've rated all the headlines. Now, we have just a few final questions. Please remember that all your responses will be treated anonymously.</p>
+                        <p class="text-gray-600 mb-6">You've rated all the headlines. Now, we have just a few final questions.</p>
                         <button onclick="nextStep()" class="btn btn-primary">Next</button>
                     </div>
                 `
@@ -1296,7 +1309,7 @@
                 condition: () => (selfSelectChoice || userCondition) !== 'Control',
                 html: `
                     <div class="space-y-8">
-                        <p class="text-gray-700 text-left">On a scale going from <b>0 (Not at all)</b> to <b>7 (Very)</b>, how much do you think the advisor group you received advice from has the following attributes?</p>
+                        <p class="text-gray-700 text-left">On a scale from <b>0 (Not at all)</b> to <b>7 (Very)</b>, how much do you think the advisor group you received advice from has the following attributes?</p>
 
                         ${[ // Performance Trust Subscale Items
                             'reliable', // Reliable subscale
@@ -1320,7 +1333,7 @@
                             </div>
                         `).join('')}
                     </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
                         {
@@ -1332,7 +1345,7 @@
                         <textarea id="no_advisor_reason" name="no_advisor_reason" class="w-full p-2 border border-gray-300 rounded-md" rows="6" placeholder="Your reason..."></textarea>
                     </div>
                     <div class="flex justify-between mt-8">
-                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                         <button onclick="nextStep()" class="btn btn-primary">Next</button>
                     </div>
                 `
@@ -1350,7 +1363,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-between mt-8"><button onclick="prevStep()" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
+                    <div class="flex justify-between mt-8"><button style="visibility:hidden" class="btn btn-secondary">Back</button><button onclick="nextStep()" class="btn btn-primary">Next</button></div>
                 `
             },
             // {
@@ -1393,7 +1406,7 @@
                         <textarea id="general_feedback" name="general_feedback" class="w-full p-2 border border-gray-300 rounded-md" rows="6"></textarea>
                     </div>
                     <div class="flex justify-between mt-8">
-                        <button onclick="prevStep()" class="btn btn-secondary">Back</button>
+                        <button style="visibility:hidden" class="btn btn-secondary">Back</button>
                         <button onclick="nextStep()" class="btn btn-primary">Next</button>
                     </div>
                 `
@@ -1658,7 +1671,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
                             <div class="option-grid">
-                            ${['Very <br>unfamiliar', 'Moderately <br>unfamiliar', 'Slightly <br>unfamiliar', 'Slightly <br>familiar', 'Moderately <br>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            ${['Very <br>unfamiliar', 'Moderately <br>unfamiliar', 'Slightly <br>unfamiliar', 'Slightly <br>familiar', 'Moderately <br>familiar', 'Very <br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -1669,8 +1682,8 @@
                 ${headlineStimulusHTML}
                 <div class="space-y-8 mt-8">${questionHTML}</div>
                 <div class="flex justify-between mt-8">
-                    <button onclick="${(currentHeadlineIndex === 0 && currentQuestionInLoop === 0) ? 'prevStep()' : 'prevHeadline()'}" class="btn btn-secondary">Back</button>
-                    <button onclick="nextHeadline()" class="btn btn-primary">Next</button>
+                    <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                    <!-- Next button removed, will auto-proceed -->
                 </div>
             `;
 
@@ -1713,7 +1726,7 @@
                         <div>
                             <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
                             <div class="option-grid">
-                            ${['Very<br>unfamiliar', 'Moderately<br>unfamiliar', 'Slightly<br>unfamiliar', 'Slightly<br>familiar', 'Moderately<ch>familiar', 'Very<br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
+                            ${['Very <br>unfamiliar', 'Moderately <br>unfamiliar', 'Slightly <br>unfamiliar', 'Slightly <br>familiar', 'Moderately <br>familiar', 'Very <br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
                             </div>
                         </div>`;
                     break;
@@ -1723,8 +1736,8 @@
                 ${headlineStimulusHTML}
                 <div class="space-y-8 mt-8">${questionHTML}</div>
                 <div class="flex justify-between mt-8">
-                    <button onclick="prevPracticeQuestion()" class="btn btn-secondary">Back</button>
-                    <button onclick="nextPracticeQuestion()" class="btn btn-primary">Next</button>
+                    <button style="visibility:hidden" class="btn btn-secondary">Back</button>
+                    <!-- Next button removed, will auto-proceed -->
                 </div>
             `;
 
@@ -1825,10 +1838,18 @@
                         </div>
                     </div> -->
                 </div>
-                 <div class="flex justify-center mt-8">
-                    <button onclick="nextGOTTrial()" class="btn btn-primary">Next</button>
-                 </div>
+                 <!-- Next button removed, will auto-proceed -->
             `;
+
+            // Auto-proceed to next trial when an answer is selected
+            const radios = app.querySelectorAll('input[name="got_choice"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    setTimeout(() => {
+                        nextGOTTrial();
+                    }, 150); // slight delay for UI feedback
+                });
+            });
         }
 
         function nextGOTTrial() {
@@ -2309,7 +2330,7 @@
             
             const questionHTML = `
                 <div>
-                    <p class="font-medium mb-3 text-center">Is this headline accurate?</p>
+                    <p class="font-medium mb-3 text-center">Your response:</p>
                     <div class="option-grid">
                         ${options.map((o,i) => {
                             const val = o.replace('<br>', ' ');
@@ -2327,13 +2348,14 @@
 
             // 4. Render the final screen
             app.innerHTML = `
-                ${adviceHTML}
-                ${headlineStimulusHTML}
-                <div class="space-y-8 mt-8">${questionHTML}</div>
-                
-                <div class="flex justify-between mt-8">
-                    <button style="visibility:hidden" class="btn btn-secondary">Back</button>
-                    <button onclick="proceedToNextHeadline()" class="btn btn-primary">Next</button>
+                <div onclick="proceedToNextHeadline()" class="cursor-pointer">
+                    ${adviceHTML}
+                    ${headlineStimulusHTML}
+                    <div class="space-y-8 mt-8">${questionHTML}</div>
+                    
+                    <div class="text-center text-gray-500 mt-8 font-medium">
+                        Click anywhere to continue.
+                    </div>
                 </div>
             `;
         }
@@ -2349,10 +2371,31 @@
                 currentStep++;
                 renderStep();
             } else {
-                renderHeadlineStep();
+                // MODIFIED: Show fixation cross before rendering next headline
+                showFixationCross(renderHeadlineStep);
             }
         }
         
+        /**
+         * NEW: Handles the 'Next' button on the practice round instructions.
+         * Shows fixation cross, then starts the practice round.
+         */
+        function startPracticeRound() {
+            saveData('task_transition'); // Save data from the transition step
+            currentStep++; // Move to 'practice_round'
+            showFixationCross(renderPracticeRoundStep);
+        }
+        
+        /**
+         * NEW: Handles the 'Start' button on the final instructions.
+         * Shows fixation cross, then starts the main headline task.
+         */
+        function startHeadlineTask() {
+            saveData('final_instructions'); // Save data from the instructions step
+            currentStep++; // Move to 'headlineLoop'
+            showFixationCross(renderHeadlineStep);
+        }
+
         function nextStep() {
             const stepData = surveySteps[currentStep];
             if (!stepData) return;
@@ -2508,6 +2551,3 @@
     </script>
 </body>
 </html>
-
-
-
