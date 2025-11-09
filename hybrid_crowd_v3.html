@@ -289,11 +289,11 @@
     <div id="test-menu" class="flex flex-col items-center space-y-2"> <!-- Modified this line -->
         <div> <!-- Group 1: Main Conditions -->
             <span class="font-bold mr-2 text-sm text-gray-700">NO-FEEDBACK TEST MENU:</span>
-            <button data-condition="Control" class="btn-test">Control</button>
+            <button data-condition="Control" class="btn-test">No Advice</button>
             <button data-condition="Fact-checker" class="btn-test">Fact-checker</button>
             <button data-condition="Human-only" class="btn-test">Human Crowd</button>
             <button data-condition="LLM-only" class="btn-test">LLM Crowd</button>
-            <button data-condition="Hybrid" class="btn-test">Hybrid</button>
+            <button data-condition="Hybrid" class="btn-test">Hybrid Crowd</button>
             <button data-condition="Self-select" class="btn-test">Self-select</button>
         </div>
         <div> <!-- Group 2: Feedback Condition -->
@@ -301,7 +301,7 @@
             <button data-condition="Control (Feedback)" class="btn-test">No Advice</button>
             <button data-condition="Human-only (Feedback)" class="btn-test">Human Crowd</button>
             <button data-condition="LLM-only (Feedback)" class="btn-test">LLM Crowd</button>
-            <button data-condition="Hybrid (Feedback)" class="btn-test">Hybrid</button>
+            <button data-condition="Hybrid (Feedback)" class="btn-test">Hybrid Crowd</button>
         </div>
     </div>
 
@@ -663,7 +663,7 @@
 
                         <!-- Question 2 -->
                         <div>
-                            <p class="font-medium mb-3 text-center">Which would you say are your MAIN sources of news? Please rank your top 3 choices in order of preference.</p>
+                            <p class="font-medium mb-3 text-center">What are your MAIN sources of news? Please rank your choices (up to 3) in order of preference.</p>
                             <div id="news-source-options" class="option-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
                                 ${['TV', 'Print newspapers/ magazines', 'Social media', 'Online news sites/ apps', 'News podcasts', 'AI chat bots'].map((o,i) => `
                                     <div id="ns_pref_${i}"
@@ -1034,7 +1034,7 @@
                         // { id: 'ss_factchecker', value: 'Fact-checker', text: 'A fact-checking organization', description: 'You will receive a single final judgment on the headline’s accuracy.' },
                         { id: 'ss_humans', value: 'Human-only', text: 'Advice from 6 different humans.', description: '6 human adults that were recruited online and observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
                         { id: 'ss_llms', value: 'LLM-only', text: 'Advice from 6 different AI chat bots.', description: '6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
-                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Advice from 3 different humans and 3 different AI chat bots.', description: '3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
+                        { id: 'ss_hybrid', value: 'Hybrid', text: 'Advice from 3 different humans and 3 different AI chat bots.', description: '3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that all observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate or inaccurate.' },
                         { id: 'ss_none', value: 'Control', text: 'No advice.', description: 'You will receive no advice when making your judgments.' }
                     ];
 
@@ -1090,7 +1090,7 @@
                         case 'Fact-checker': info = `<p class="mb-4">To help you make your judgment, you will receive advice from a professional fact-checking organization, and whether they deemed the headline to be accurate (green icon) or inaccurate (red icon).</p>`; break;
                         case 'Human-only': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 6 human adults that were recruited online and observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                         case 'LLM-only': info = `<p class="mb-4">To help you make your judgment,  you will receive advice from 6 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
-                        case 'Hybrid': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
+                        case 'Hybrid': info = `<p class="mb-4">To help you make your judgment, you will receive advice from 3 human adults that were recruited online and 3 AI chat bots (e.g., ChatGPT, Gemini, and others) that all observed the same news headlines as you will observe and independently judged whether they thought the headline was accurate (green icon) or inaccurate (red icon).</p>`; break;
                     }
 
                     // --- NEW LOGIC START ---
@@ -1737,7 +1737,7 @@
                 case 1: // Familiarity (was case 1)
                      questionHTML = `
                         <div>
-                            <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
+                            <p class="font-medium mb-3 text-center">Are you familiar with the headline (have you seen or heard about it before)?</p>
                             <div class="option-grid">
                             ${['Very <br>unfamiliar', 'Moderately <br>unfamiliar', 'Slightly <br>unfamiliar', 'Slightly <br>familiar', 'Moderately <br>familiar', 'Very <br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
                             </div>
@@ -1792,7 +1792,7 @@
                 case 1: // Familiarity (CHANGED from case 2)
                      questionHTML = `
                         <div>
-                            <p class="font-medium mb-3 text-center">Are you familiar with the above headline (have you seen or heard about it before)?</p>
+                            <p class="font-medium mb-3 text-center">Are you familiar with the headline (have you seen or heard about it before)?</p>
                             <div class="option-grid">
                             ${['Very <br>unfamiliar', 'Moderately <br>unfamiliar', 'Slightly <br>unfamiliar', 'Slightly <br>familiar', 'Moderately <br>familiar', 'Very <br>familiar'].map((o,i)=>`<div><input type="radio" name="familiarity" value="${o.replace('<br>', ' ')}" id="fam_${i}" class="hidden"><label class="option-button" for="fam_${i}">${o}</label></div>`).join('')}
                             </div>
